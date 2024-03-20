@@ -1,0 +1,25 @@
+<ion-content [fullscreen]="true">
+  <body class="custom-background"></body>
+  <div class="container__card">
+    <ion-card *ngFor="let publicacion of publicaciones" class="card">
+      <ion-card-header>
+        <ion-card-subtitle
+          >{{ publicacion.fecha | date:'short' }}</ion-card-subtitle
+        >
+        <ion-card-title>{{ publicacion.nombreUsuario }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-img
+        class="img"
+        [src]="publicacion.imagenURL"
+        (click)="mostrarInformacion(publicacion)"
+      ></ion-img>
+
+      <ion-card-content>
+        <ion-card-title>{{ publicacion.descripcion }}</ion-card-title>
+        <ion-card-title>{{ publicacion.direccion }}</ion-card-title>
+        <ion-card-title>{{ publicacion.numeroContacto }}</ion-card-title>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

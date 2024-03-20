@@ -1,0 +1,77 @@
+.borde {
+
+    border: 2px solid black;
+   
+  }
+.imagen {
+    border-radius: 10px;
+    border: 0.2rem solid lightgray;
+    display: block;
+    margin: 1rem auto 0.5rem;
+    background-size: cover;
+    background-color: lightcyan;
+    //Sombreado
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 5);
+  }
+  img{
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 5);
+  }
+  
+  .fondo {
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-image: url("https://img.freepik.com/vector-gratis/marco-perros-sobre-fondo-blanco_53876-99295.jpg");
+    background-size: cover;
+    width: 100%;
+    box-shadow: 0 4px 6px lightblue;
+
+  }
+
+
+  .content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Ajusta la altura del contenido al 100% del viewport */
+    margin: 1rem;
+    border-radius: 10px;
+    border: 2px solid black;
+  }
+  
+  .logincontainer {
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Ajusta el ancho del contenedor al 100% del viewport */
+padding: 0.5rem 2rem 0 2rem;
+  }
+  .centered-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 80%; /* Ajusta el ancho del ion-item según tus necesidades */
+    margin: 0 auto ;
+    margin-bottom: 0.1rem;
+    border-radius: 10px;
+    border: 0.5px solid lightblue;
+    background-size: cover;
+    background-position: center;
+  }
+  .centered-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 80%; /* Ajusta el ancho del ion-item según tus necesidades */
+    margin: 0 auto ;
+    margin-bottom: 0.1rem;
+    border-radius: 10px;
+    border: 2px solid black;
+    background-size: cover;
+    background-position: center;
+  }
+  
