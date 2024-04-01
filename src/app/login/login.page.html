@@ -15,6 +15,11 @@
         <h2 class="welcome-message">Bienvenido</h2>
         <p class="welcome-subtext">Inicia sesión para continuar</p>
         
+            <!-- Agrega esto para mostrar el mensaje de error -->
+          <div *ngIf="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
+
         <form (ngSubmit)="onSubmit()">
           <ion-item lines="full" class="ion-margin-bottom">
             <ion-label position="stacked">Correo Electrónico</ion-label>

@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router'; // Asegúrate de importa
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth'; // Importa AngularFireAuthModule
-
+import { AlertController } from '@ionic/angular';
 import { LoginPage } from './login.page';
 
 // Define las rutas para el módulo LoginPageModule
@@ -17,6 +17,7 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [LoginPage],
+  providers: [], 
   imports: [
     CommonModule,
     FormsModule,

@@ -20,6 +20,7 @@ body {
   background-color: var(--ion-background-color);
 }
 
+
 ion-title {
   color: white;
   text-align: center;
@@ -73,6 +74,8 @@ ion-item:not(:last-child) {
   width: 100%; /* Asegurarse de que ocupe el ancho total */
   text-align: center;
 }
+
+
 
 /* Small screen adjustments */
 @media (max-width: 576px) {
