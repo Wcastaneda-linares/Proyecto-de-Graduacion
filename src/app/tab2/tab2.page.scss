@@ -1,7 +1,13 @@
 .custom-background {
   background-image: url("https://png.pngtree.com/thumb_back/fw800/back_our/20190620/ourmid/pngtree-functional-dog-food-promotion-main-map-image_144794.jpg");
   background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: red; /* Temporalmente */
+  height: 100%; /* Asegúrate de que el contenedor ocupe toda la altura */
+  width: 100%;
 }
+
 
 .container__card {
   max-width: 1200px;

@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { NavController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { AuthService } from '../user-service/auth.service';  // Asegúrate de que la ruta sea correcta
 
 @Component({
   selector: 'app-tab1',
@@ -10,7 +12,11 @@ import { NavController } from '@ionic/angular';
 export class Tab1Page {
   imagenURL: string | undefined;
 
-  constructor(private navCtrl: NavController) {}
+  constructor(
+    private navCtrl: NavController,
+    private authService: AuthService,  // Inyecta AuthService
+    private router: Router             // Inyecta Router para navegación
+  ) {}
 
   async tomarFoto() {
     const image = await Camera.getPhoto({
@@ -26,5 +32,13 @@ export class Tab1Page {
         state: { imagenURL: this.imagenURL },
       });
     }
+  }
+
+  logout() {
+    this.authService.logout().then(() => {
+      this.router.navigate(['/login']);  // Redirige al usuario a la página de login
+    }).catch(error => {
+      console.error('Error al cerrar sesión', error);
+    });
   }
 }

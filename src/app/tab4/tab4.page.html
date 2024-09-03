@@ -1,0 +1,73 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Administración de Usuarios</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+        Cerrar Sesión
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <body class="custom-background"></body>
+  <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
+    <ion-segment-button value="user-management">
+      Gestión de Usuarios
+    </ion-segment-button>
+    <ion-segment-button value="change-password">
+      Cambiar Contraseña
+    </ion-segment-button>
+    <ion-segment-button value="manage-posts">
+      Gestionar Publicaciones
+    </ion-segment-button>
+  </ion-segment>
+
+  <ng-container *ngIf="selectedSegment === 'user-management'">
+    <!-- Tabla de usuarios -->
+    <ion-grid>
+      <ion-row class="header-row">
+        <ion-col size="3"><strong>Nombre</strong></ion-col>
+        <ion-col size="3"><strong>Email</strong></ion-col>
+        <ion-col size="3"><strong>Último Acceso</strong></ion-col>
+        <ion-col size="3"><strong>Acciones</strong></ion-col>
+      </ion-row>
+      <ion-row *ngFor="let usuario of usuariosPaginados" class="data-row">
+        <ion-col size="3">{{ usuario.name }}</ion-col>
+        <ion-col size="3">{{ usuario.email }}</ion-col>
+        <ion-col size="3">{{ usuario.lastSignInTime | date:'short' }}</ion-col>
+        <ion-col size="3">
+          <ion-button fill="outline" color="primary" (click)="editarUsuario(usuario)">
+            Editar
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Paginación -->
+    <ion-footer>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
+            Anterior
+          </ion-button>
+        </ion-buttons>
+        <ion-title>Página {{ paginaActual }} de {{ totalPaginas }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button [disabled]="paginaActual === totalPaginas" (click)="cambiarPagina(paginaActual + 1)">
+            Siguiente
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-container>
+
+  <ng-container *ngIf="selectedSegment === 'change-password'">
+    <!-- Aquí va la lógica para cambiar la contraseña -->
+  </ng-container>
+
+  <ng-container *ngIf="selectedSegment === 'manage-posts'">
+    <!-- Aquí va la lógica para gestionar publicaciones -->
+  </ng-container>
+</ion-content>

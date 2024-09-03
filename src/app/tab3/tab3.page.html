@@ -1,7 +1,12 @@
-<ion-header [translucent]="true">
-  <ion-fab></ion-fab>
+<ion-header>
   <ion-toolbar>
     <ion-title>Perfil</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+        Cerrar Sesión
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 

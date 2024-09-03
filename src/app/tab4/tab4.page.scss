@@ -1,0 +1,96 @@
+.custom-background {
+    background-image: url("https://png.pngtree.com/thumb_back/fw800/back_our/20190620/ourmid/pngtree-functional-dog-food-promotion-main-map-image_144794.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-height: 100vh;
+  }
+  
+  ion-grid {
+    width: 100%;
+    background: transparent;
+    overflow-x: auto; /* Permite el desplazamiento horizontal si es necesario */
+  }
+  
+  .header-row {
+    background-color: rgba(0, 0, 0, 0.7);
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    text-align: center;
+  }
+  
+  .header-row ion-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid #000;
+  }
+  
+  .data-row {
+    border-bottom: 1px solid #000;
+  }
+  
+  .data-row ion-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid #000;
+    word-wrap: break-word; /* Permite que el texto se ajuste a la celda */
+    white-space: normal; /* Permite que el texto se ajuste dentro de la celda */
+    text-align: center; /* Centra el texto dentro de la celda */
+    overflow-wrap: break-word; /* Asegura que el texto se divida en varias líneas si es necesario */
+  }
+  
+  .data-row ion-col:last-child {
+    border-right: 1px solid #000;
+  }
+  
+  ion-grid, ion-row {
+    border-collapse: collapse;
+  }
+  
+  ion-footer {
+    margin-top: 20px;
+    background: transparent;
+  }
+  
+  ion-button {
+    --border-radius: 5px;
+    --border-width: 1px;
+    --border-color: #ddd;
+  }
+  
+  /* Reglas de medios para dispositivos pequeños */
+  @media screen and (max-width: 768px) {
+    .header-row ion-col {
+      font-size: 12px;
+      padding: 6px;
+    }
+  
+    .data-row ion-col {
+      font-size: 12px;
+      padding: 6px;
+    }
+  
+    ion-button {
+      --padding-start: 5px;
+      --padding-end: 5px;
+      font-size: 12px;
+    }
+  
+    ion-grid {
+      overflow-x: auto;
+    }
+  
+    /* Fuerza el ajuste del contenido en pantallas pequeñas */
+    .data-row ion-col {
+      white-space: normal; /* Permite que el texto se ajuste dentro de la celda */
+      word-wrap: break-word; /* Ajusta el texto largo para que no se salga de la celda */
+      overflow-wrap: break-word; /* Asegura que el texto se divida en varias líneas si es necesario */
+      text-align: center; /* Centra el texto en la celda */
+      overflow: hidden; /* Evita desbordamientos */
+    }
+  }
+  

@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { ChatPageModule } from './chat/chat.module'; // Asegúrate de que la ruta y el nombre del módulo sean correctos
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'; // Asegúrate de que Capacitor Camera esté instalado correctamente
+import { AuthGuard } from './user-service/auth.guard'; // Asegúrate de la ruta correcta
 
 
 const routes: Routes = [
@@ -10,6 +11,11 @@ const routes: Routes = [
     redirectTo: 'login',
     pathMatch: 'full',
 
+  },
+  {
+    path: 'tab4',
+    loadChildren: () => import('./tab4/tab4.module').then(m => m.Tab4PageModule),
+    canActivate: [AuthGuard]  // Protege la ruta
   },
   {
     path: '',

@@ -9,6 +9,7 @@ import {
 } from '@ionic/angular';
 import { ImageViewerModalPage } from '../image-viewer-modal/image-viewer-modal.page';
 import { FireserviceService } from '../fireservice.service';
+import { AuthService } from '../user-service/auth.service'; // Asegúrate de importar AuthService
 
 // Definir una interfaz para la estructura de usuario
 interface Usuario {
@@ -31,12 +32,23 @@ export class Tab2Page {
     private toastController: ToastController,
     private actionSheetController: ActionSheetController,
     private modalController: ModalController,
-    private fireAuth: FireserviceService
+    private fireAuth: FireserviceService,
+    private authService: AuthService // Inyecta AuthService
   ) {
     this.afAuth.authState.subscribe((user) => {
       this.user = user;
     });
     this.obtenerPublicaciones();
+  }
+
+  async logout() {
+    try {
+      await this.authService.logout();
+      this.router.navigate(['/login']); // Redirige al usuario a la página de login
+    } catch (error) {
+      console.error('Error al cerrar sesión', error);
+      this.mostrarToast('Error al cerrar sesión');
+    }
   }
 
   async obtenerPublicaciones() {
@@ -142,7 +154,6 @@ export class Tab2Page {
           role: 'cancel',
         },
       ],
-      
     });
 
     await actionSheet.present();

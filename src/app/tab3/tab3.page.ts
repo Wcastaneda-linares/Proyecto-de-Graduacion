@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Router } from '@angular/router';  // Importa Router
+import { AuthService } from '../user-service/auth.service';  // Asegúrate de importar AuthService
 
 @Component({
   selector: 'app-tab3',
@@ -12,7 +14,9 @@ export class Tab3Page implements OnInit {
 
   constructor(
     private afAuth: AngularFireAuth,
-    private firestore: AngularFirestore
+    private firestore: AngularFirestore,
+    private authService: AuthService,  // Inyecta AuthService
+    private router: Router  // Inyecta Router
   ) {}
 
   ngOnInit() {
@@ -38,6 +42,14 @@ export class Tab3Page implements OnInit {
             }
           );
       }
+    });
+  }
+
+  logout() {
+    this.authService.logout().then(() => {
+      this.router.navigate(['/login']);  // Redirige al usuario a la página de login
+    }).catch(error => {
+      console.error('Error al cerrar sesión', error);
     });
   }
 }
