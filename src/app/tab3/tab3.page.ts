@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { Router } from '@angular/router';  // Importa Router
-import { AuthService } from '../user-service/auth.service';  // Asegúrate de importar AuthService
+import { Router } from '@angular/router';
+import { AuthService } from '../user-service/auth.service';
 
 @Component({
   selector: 'app-tab3',
@@ -15,8 +15,8 @@ export class Tab3Page implements OnInit {
   constructor(
     private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
-    private authService: AuthService,  // Inyecta AuthService
-    private router: Router  // Inyecta Router
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -35,6 +35,13 @@ export class Tab3Page implements OnInit {
               if (doc.exists) {
                 this.usuario = doc.data();
                 console.log('Información del usuario:', this.usuario);
+                
+                // Asegúrate de que el campo "name" existe antes de almacenarlo
+                if (this.usuario && this.usuario.name) {
+                  localStorage.setItem('usuario', this.usuario.name);  // Guardamos el nombre en localStorage
+                } else {
+                  console.error('El usuario no tiene un campo "name"');
+                }
               }
             },
             (error) => {
@@ -44,9 +51,11 @@ export class Tab3Page implements OnInit {
       }
     });
   }
+ 
 
   logout() {
     this.authService.logout().then(() => {
+      localStorage.removeItem('usuario');  // Limpiamos el localStorage al cerrar sesión
       this.router.navigate(['/login']);  // Redirige al usuario a la página de login
     }).catch(error => {
       console.error('Error al cerrar sesión', error);

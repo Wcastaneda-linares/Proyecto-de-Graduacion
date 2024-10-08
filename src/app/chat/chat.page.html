@@ -11,21 +11,28 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-list>
-    <ion-item *ngFor="let mensaje of mensajes">
-      {{ mensaje.contenido }}
-    </ion-item>
-  </ion-list>
-
-  <ion-card>
-    <ion-card-content>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="nuevoMensaje"
-          placeholder="Escribe un mensaje..."
-        ></ion-input>
-        <ion-button slot="end" (click)="enviarMensaje()">Enviar</ion-button>
+  
+  <div class="chat-container">
+    <ion-list #chatContainer>
+      <ion-item *ngFor="let mensaje of mensajes">
+        <ion-label>
+          <h2>{{ mensaje.usuario }}: {{ mensaje.contenido }}</h2>
+          <!-- Mostrar tanto la fecha como la hora -->
+          <p>{{ mensaje.timestamp | date:'medium' }}</p> <!-- Formato de fecha corta y hora corta -->
+        </ion-label>
       </ion-item>
-    </ion-card-content>
-  </ion-card>
+    </ion-list>
+
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-input
+            [(ngModel)]="nuevoMensaje"
+            placeholder="Escribe un mensaje..."
+          ></ion-input>
+          <ion-button slot="end" (click)="enviarMensaje()">Enviar</ion-button>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>
