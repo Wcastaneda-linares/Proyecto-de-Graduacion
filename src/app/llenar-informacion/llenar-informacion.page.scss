@@ -1,0 +1,77 @@
+ion-content {
+    --background: #f9f9f9; /* Fondo claro para mejorar la visibilidad */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+  }
+  
+  .form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para el contenedor */
+    max-width: 800px;
+    width: 100%;
+  }
+  
+  ion-item {
+    margin-bottom: 1.5rem; /* Espaciado más amplio entre los elementos */
+    --background: #ffffff; /* Fondo blanco para cada campo */
+    --border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.05); /* Sombra suave para los campos */
+  }
+  
+  ion-label {
+    font-size: 1rem; /* Tamaño del texto más grande */
+    font-weight: 600; /* Negrita en las etiquetas */
+    color: #333; /* Color oscuro para mejor legibilidad */
+  }
+  
+  ion-input,
+  ion-select,
+  ion-textarea {
+    padding: 0.75rem; /* Mayor espaciado dentro de los inputs */
+    font-size: 1rem; /* Tamaño del texto dentro de los inputs */
+  }
+  
+  ion-button {
+    --background: #4caf50; /* Botón verde llamativo */
+    color: #ffffff;
+    font-size: 1.2rem; /* Tamaño del texto del botón */
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15); /* Sombra del botón */
+    transition: background-color 0.3s ease;
+  }
+  
+  ion-button:hover {
+    --background: #45a049; /* Botón más oscuro al hacer hover */
+  }
+  
+  .upload-container {
+    margin-top: 1rem; /* Espacio entre el área de upload y los demás campos */
+    text-align: center;
+  }
+  
+  .upload-container ion-label {
+    font-size: 1.1rem; /* Texto más grande para la sección de upload */
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .upload-container ion-input {
+    width: 100%; /* Hacemos que el input ocupe el 100% del contenedor */
+  }
+  
+  .form-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #4caf50; /* Color verde para el título */
+    margin-bottom: 2rem;
+  }
+  
