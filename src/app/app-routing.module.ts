@@ -18,6 +18,10 @@ const routes: Routes = [
     canActivate: [AuthGuard]  // Protege la ruta
   },
   {
+    path: 'solicitudes-adopcion',
+    loadChildren: () => import('./solicitudes-adopcion/solicitudes-adopcion.module').then(m => m.SolicitudesAdopcionPageModule)
+  },
+  {
     path: '',
     loadChildren: () =>
       import('./tabs/tabs.module').then((m) => m.TabsPageModule),
@@ -55,6 +59,11 @@ const routes: Routes = [
     path: 'user-service',
     loadChildren: () => import('./user-service/user-service.module').then( m => m.UserServicePageModule)
   },
+  {
+    path: 'solicitudes-adopcion',
+    loadChildren: () => import('./solicitudes-adopcion/solicitudes-adopcion.module').then( m => m.SolicitudesAdopcionPageModule)
+  },
+
 ];
 @NgModule({
   imports: [

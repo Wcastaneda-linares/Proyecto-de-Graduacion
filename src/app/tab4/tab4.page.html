@@ -10,64 +10,86 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <body class="custom-background"></body>
+<!-- Asegúrate de agregar la clase custom-background -->
+<ion-content [fullscreen]="true" class="custom-background">
+  <!-- Segmento para navegar entre secciones -->
   <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
     <ion-segment-button value="user-management">
       Gestión de Usuarios
     </ion-segment-button>
-    <ion-segment-button value="change-password">
-      Cambiar Contraseña
-    </ion-segment-button>
     <ion-segment-button value="manage-posts">
       Gestionar Publicaciones
     </ion-segment-button>
+    <ion-segment-button value="adoption-requests">
+      Solicitudes de Adopción
+    </ion-segment-button>
   </ion-segment>
 
+  <!-- Gestión de usuarios -->
   <ng-container *ngIf="selectedSegment === 'user-management'">
-    <!-- Tabla de usuarios -->
-    <ion-grid>
-      <ion-row class="header-row">
-        <ion-col size="3"><strong>Nombre</strong></ion-col>
-        <ion-col size="3"><strong>Email</strong></ion-col>
-        <ion-col size="3"><strong>Último Acceso</strong></ion-col>
-        <ion-col size="3"><strong>Acciones</strong></ion-col>
-      </ion-row>
-      <ion-row *ngFor="let usuario of usuariosPaginados" class="data-row">
-        <ion-col size="3">{{ usuario.name }}</ion-col>
-        <ion-col size="3">{{ usuario.email }}</ion-col>
-        <ion-col size="3">{{ usuario.lastSignInTime | date:'short' }}</ion-col>
-        <ion-col size="3">
-          <ion-button fill="outline" color="primary" (click)="editarUsuario(usuario)">
-            Editar
-          </ion-button>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-
-    <!-- Paginación -->
-    <ion-footer>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-button [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
-            Anterior
-          </ion-button>
-        </ion-buttons>
-        <ion-title>Página {{ paginaActual }} de {{ totalPaginas }}</ion-title>
-        <ion-buttons slot="end">
-          <ion-button [disabled]="paginaActual === totalPaginas" (click)="cambiarPagina(paginaActual + 1)">
-            Siguiente
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-footer>
+    <ion-list>
+      <ion-item *ngFor="let usuario of usuariosPaginados">
+        <ion-label>
+          <h2>{{ usuario.name }}</h2>
+          <p>{{ usuario.email }}</p>
+          <p>Último acceso: {{ usuario.lastSignInTime | date:'short' }}</p>
+        </ion-label>
+        <ion-button color="danger" (click)="eliminarUsuario(usuario)">
+          Eliminar
+        </ion-button>
+      </ion-item>
+    </ion-list>
   </ng-container>
 
-  <ng-container *ngIf="selectedSegment === 'change-password'">
-    <!-- Aquí va la lógica para cambiar la contraseña -->
-  </ng-container>
+  <!-- Gestión de publicaciones -->
+   
+<!-- Gestión de publicaciones -->
+<ng-container *ngIf="selectedSegment === 'manage-posts'">
+  <ion-list *ngIf="publicaciones && publicaciones.length > 0">
+    <ion-item *ngFor="let publicacion of publicaciones">
+      <!-- Imagen de la mascota -->
+      <ion-img [src]="publicacion.imagenURL || 'assets/default-avatar.png'" class="mascota-img"></ion-img>
+    
+      <!-- Información de la mascota -->
+      <ion-label>
+        <h2>{{ publicacion.nombreMascota || 'Nombre desconocido' }}</h2>
+        <p>Raza: {{ publicacion.razaMascota || 'Desconocida' }}</p>
+        <p>Edad: {{ publicacion.edadMascota || 'No disponible' }} años</p>
+        <p>Tipo: {{ publicacion.tipoMascota || 'No especificado' }}</p>
+        <p>Estado de salud: {{ publicacion.estadoSaludMascota || 'No disponible' }}</p>
+        <p>Descripción: {{ publicacion.descripcionMascota || 'Sin descripción' }}</p>
+      </ion-label>
+    
+      <!-- Botones para eliminar y actualizar -->
+      <ion-button fill="outline" color="primary" (click)="openUpdateModal(publicacion)">
+        Actualizar
+      </ion-button>
+      <ion-button fill="outline" color="danger" (click)="eliminarPublicacion(publicacion)">
+        Eliminar
+      </ion-button>
+    </ion-item>
+  </ion-list>
+</ng-container>
 
-  <ng-container *ngIf="selectedSegment === 'manage-posts'">
-    <!-- Aquí va la lógica para gestionar publicaciones -->
+  
+
+  <!-- Solicitudes de adopción -->
+  <ng-container *ngIf="selectedSegment === 'adoption-requests'">
+    <ion-list *ngIf="solicitudesAdopcion && solicitudesAdopcion.length > 0">
+      <ion-item *ngFor="let solicitud of solicitudesAdopcion">
+        <ion-label>
+          <h2>Mascota: {{ solicitud.nombreMascota || 'Desconocido' }}</h2>
+          <p>Solicitante: {{ solicitud.nombreUsuarioSolicitante || 'Usuario desconocido' }}</p>
+          <p>Fecha: {{ solicitud.fecha?.toDate() | date: 'medium' }}</p>
+          <p>Estado: {{ solicitud.estado || 'Pendiente' }}</p>
+        </ion-label>
+        <ion-button fill="outline" color="success" (click)="aprobarSolicitud(solicitud)">
+          Aprobar
+        </ion-button>
+        <ion-button fill="outline" color="danger" (click)="rechazarSolicitud(solicitud)">
+          Rechazar
+        </ion-button>
+      </ion-item>
+    </ion-list>
   </ng-container>
 </ion-content>

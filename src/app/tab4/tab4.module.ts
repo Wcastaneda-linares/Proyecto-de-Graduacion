@@ -1,23 +1,20 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { Tab4PageRoutingModule } from './tab4-routing.module';
 import { Tab4Page } from './tab4.page';
-import { EditUserModalComponent } from '../edit-user-modal/edit-user-modal.component';
+import { UpdatePublicacionModalModule } from '../update-publicacion-modal/update-publicacion-modal.module';  // Importa el módulo del modal
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
     IonicModule,
-    Tab4PageRoutingModule
+    Tab4PageRoutingModule,
+    UpdatePublicacionModalModule  // Usa el módulo del modal aquí
   ],
-  declarations: [
-    Tab4Page,
-    EditUserModalComponent
-  ]
+  declarations: [Tab4Page],
 })
-export class Tab4PageModule {}  // Asegúrate de que este nombre es correcto y coincide con el utilizado en las rutas
+export class Tab4PageModule {}

@@ -1,116 +1,88 @@
+/* Imagen de fondo */
 .custom-background {
-  background-image: url("https://png.pngtree.com/thumb_back/fw800/back_our/20190620/ourmid/pngtree-functional-dog-food-promotion-main-map-image_144794.jpg");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: red; /* Temporalmente */
-  height: 100%; /* Asegúrate de que el contenedor ocupe toda la altura */
-  width: 100%;
-}
-
-
-.container__card {
-  max-width: 1200px;
-  margin: auto;
-  perspective: 1000px;
+  --background: url('https://png.pngtree.com/thumb_back/fw800/back_our/20190620/ourmid/pngtree-functional-dog-food-promotion-main-map-image_144794.jpg') no-repeat center center/cover;
+  background-attachment: fixed; /* Fija el fondo durante el scroll */
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.card__father {
-  margin: 20px;
-  perspective: 1000px;
-}
-
-.card__father:hover .card {
-  transform: rotateY(180deg);
-}
-
-.card {
-  width: 350px;
-  height: 300px;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: all 600ms;
-}
-
-.card__front {
-  background-size: cover;
-  background-position: center;
-}
-
-.card__front,
-.card__back {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
-  border-radius: 20px;
-}
-
-.card__back {
-  transform: rotateY(180deg);
-  background: white;
-}
-
-.body__card_front {
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  padding: 40px;
-  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #fff;
-  transform: translateZ(60px);
 }
 
-.bg {
+/* Hacer el ion-content y ion-list transparentes */
+ion-content {
+  --background: transparent;  /* Fondo del contenido transparente */
+}
+
+ion-list {
+  background: rgba(255, 255, 255, 0.1);  /* Fondo semi-transparente */
+  backdrop-filter: blur(10px); /* Aplicamos desenfoque para darle un toque elegante */
+}
+
+/* Estilo de las tarjetas */
+.card-transparente {
+  background: rgba(255, 255, 255, 0.8);  /* Fondo semi-transparente para que sea más legible */
+  border-radius: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);  /* Sombra suave */
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Imagen más grande de la mascota */
+.mascota-img {
   width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 20px;
+  height: 200px; /* Ajusta el tamaño según tu preferencia */
+  object-fit: cover; /* Asegura que la imagen cubra el contenedor */
 }
 
-.body__card_back {
-  padding: 40px;
-  text-align: center;
-  transform: translateZ(60px);
+/* Ajuste de contenido */
+ion-card-content {
+  padding: 15px;
+  font-size: 0.9em;
+  color: #333;
 }
 
-.body__card_back p {
-  margin-top: 30px;
-  font-size: 18px;
+/* Botones más redondeados */
+ion-button {
+  --border-radius: 20px;
 }
 
-.body__card_back input {
-  padding: 10px 40px;
-  margin-top: 30px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
+ion-item[lines="none"] {
+  --min-height: 0;
+  margin-top: -10px;
+}
+
+/* Sombras en hover */
+ion-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Encabezado y barra de herramientas */
+ion-toolbar {
+  --background: #3880ff;
   color: white;
-  background: #58b0f6;
-  box-shadow: 1px 1px 30px -5px #58b0f6;
-  border-radius: 10px;
-  transition: box-shadow 600ms;
 }
 
-.body__card_back input:hover {
-  box-shadow: 1px 1px 30px 0px #449de6;
+/* Títulos */
+h2 {
+  font-weight: bold;
+  font-size: 1.3em;
+  color: #333;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
-.img {
-  background-color: transparent;
-  position: relative;
-  margin-left: 1.2rem;
-  width: 150px;
-  height: 140px;
+/* Párrafos */
+p {
+  margin: 5px 0;
+  color: #555;
+}
+
+/* Botón de cerrar sesión */
+ion-button {
+  color: white;
+}
+
+ion-icon {
+  margin-right: 5px;
 }

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { FireserviceService } from '../fireservice.service';
-import { EditUserModalComponent } from '../edit-user-modal/edit-user-modal.component'; // Importa el componente aquí
+import { Router } from '@angular/router';
+import { UpdatePublicacionModalComponent } from '../update-publicacion-modal/update-publicacion-modal.component'; // Asegúrate de importar el componente del modal
 
 @Component({
   selector: 'app-tab4',
@@ -10,75 +11,108 @@ import { EditUserModalComponent } from '../edit-user-modal/edit-user-modal.compo
   styleUrls: ['./tab4.page.scss'],
 })
 export class Tab4Page implements OnInit {
-  usuarios: any[] = [];
+  selectedSegment = 'user-management';
   usuariosPaginados: any[] = [];
-  paginaActual: number = 1;
-  elementosPorPagina: number = 5;
-  totalPaginas: number = 1;
-  selectedSegment: string = 'user-management';
+  publicaciones: any[] = [];
+  solicitudesAdopcion: any[] = [];
 
   constructor(
     private fireService: FireserviceService,
-    private router: Router,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private firestore: AngularFirestore,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.obtenerUsuarios();
-  }
-
-  
-
-  obtenerUsuarios() {
-    this.fireService.getUsersWithLastSignIn().subscribe(
-      (data: any[]) => {
-        this.usuarios = data;
-        this.totalPaginas = Math.ceil(this.usuarios.length / this.elementosPorPagina);
-        this.actualizarUsuariosPaginados();
-      },
-      (error: any) => {
-        console.error('Error obteniendo usuarios:', error);
-      }
-    );
-  }
-
-  actualizarUsuariosPaginados() {
-    const inicio = (this.paginaActual - 1) * this.elementosPorPagina;
-    const fin = inicio + this.elementosPorPagina;
-    this.usuariosPaginados = this.usuarios.slice(inicio, fin);
-  }
-
-  cambiarPagina(pagina: number) {
-    this.paginaActual = pagina;
-    this.actualizarUsuariosPaginados();
+    this.obtenerPublicaciones();
+    this.obtenerSolicitudesAdopcion();
   }
 
   segmentChanged(event: any) {
     this.selectedSegment = event.detail.value;
   }
 
-  async editarUsuario(usuario: any) {
-    const modal = await this.modalCtrl.create({
-      component: EditUserModalComponent,
-      componentProps: { usuario }  // Pasar el usuario al modal
+  obtenerUsuarios() {
+    // Obtiene los usuarios desde el servicio Firestore
+    this.fireService.getUsers().subscribe((usuarios: any[]) => {
+      this.usuariosPaginados = usuarios;
     });
-  
+  }
+
+  obtenerPublicaciones() {
+    // Obtiene las publicaciones desde Firestore
+    this.firestore.collection('publicaciones').valueChanges().subscribe(async (publicaciones: any[]) => {
+      const publicacionesConDatos = await Promise.all(publicaciones.map(async (publicacion) => {
+        const correoUsuario = publicacion.correo || 'Desconocido';
+        const nombreUsuario = await this.fireService.obtenerNombreUsuario(correoUsuario);
+        return {
+          ...publicacion,
+          nombreUsuario,
+          nombreMascota: publicacion.nombreMascota || 'Nombre desconocido',
+          razaMascota: publicacion.razaMascota || 'Desconocida',
+          edadMascota: publicacion.edadMascota || 'No disponible',
+          tipoMascota: publicacion.tipoMascota || 'No especificado',
+          estadoSaludMascota: publicacion.estadoSaludMascota || 'No disponible',
+          descripcionMascota: publicacion.descripcionMascota || 'Sin descripción',
+          donante: publicacion.donante || {}
+        };
+      }));
+      this.publicaciones = publicacionesConDatos;
+    });
+  }
+
+  obtenerSolicitudesAdopcion() {
+    this.firestore.collection('solicitudes_adopcion').valueChanges().subscribe((solicitudes: any[]) => {
+      this.solicitudesAdopcion = solicitudes;
+    });
+  }
+
+  eliminarUsuario(usuario: any) {
+    this.fireService.deleteUser(usuario.id).then(() => {
+      this.obtenerUsuarios();
+    });
+  }
+
+  eliminarPublicacion(publicacion: any) {
+    this.firestore.collection('publicaciones').doc(publicacion.id).delete().then(() => {
+      this.obtenerPublicaciones(); // Actualiza la lista de publicaciones
+    });
+  }
+
+  async openUpdateModal(publicacion: any) {
+    const modal = await this.modalCtrl.create({
+      component: UpdatePublicacionModalComponent,
+      componentProps: { publicacion }
+    });
+
     modal.onDidDismiss().then((result) => {
       if (result.data) {
-        this.obtenerUsuarios(); // Actualiza la lista de usuarios si es necesario
+        // Actualiza la publicación en Firestore
+        this.firestore.collection('publicaciones').doc(publicacion.id).update(result.data).then(() => {
+          this.obtenerPublicaciones(); // Actualiza la lista de publicaciones después de actualizarla en Firestore
+        });
       }
     });
-  
+
     return await modal.present();
   }
-  
-  
+
+  aprobarSolicitud(solicitud: any) {
+    this.firestore.collection('solicitudes_adopcion').doc(solicitud.id).update({ estado: 'Aprobada' }).then(() => {
+      this.obtenerSolicitudesAdopcion(); // Refresca las solicitudes después de aprobar
+    });
+  }
+
+  rechazarSolicitud(solicitud: any) {
+    this.firestore.collection('solicitudes_adopcion').doc(solicitud.id).update({ estado: 'Rechazada' }).then(() => {
+      this.obtenerSolicitudesAdopcion(); // Refresca las solicitudes después de rechazar
+    });
+  }
 
   logout() {
     this.fireService.logout().then(() => {
       this.router.navigate(['/login']);
-    }).catch((error: any) => {
-      console.error('Error al cerrar sesión', error);
     });
   }
 }
