@@ -29,6 +29,8 @@ export class FireserviceService {
     return this.firestore.collection('users').doc(data.uid).valueChanges();
   }
 
+  
+
   // Esta es la función que faltaba para obtener el nombre del usuario
   async obtenerNombreUsuario(correo: string): Promise<string> {
     try {

@@ -30,6 +30,12 @@ const routes: Routes = [
           import('../tab4/tab4.module').then((m) => m.Tab4PageModule),
       },
       
+
+      {
+        path: 'chat',
+        loadChildren: () => import('../chat/chat.module').then(m => m.ChatPageModule)
+      },
+      
       {
         path: '',
         redirectTo: '/login',

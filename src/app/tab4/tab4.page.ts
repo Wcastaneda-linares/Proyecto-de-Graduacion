@@ -63,11 +63,15 @@ export class Tab4Page implements OnInit {
   }
 
   obtenerSolicitudesAdopcion() {
-    this.firestore.collection('solicitudes_adopcion').valueChanges().subscribe((solicitudes: any[]) => {
-      this.solicitudesAdopcion = solicitudes;
+    this.firestore.collection('solicitudes_adopcion').snapshotChanges().subscribe(snapshots => {
+      this.solicitudesAdopcion = snapshots.map(snap => {
+        const data = snap.payload.doc.data() as Record<string, any>; 
+        const id = snap.payload.doc.id;       
+        return { id, ...data };               
+      });
     });
   }
-
+  
   eliminarUsuario(usuario: any) {
     this.fireService.deleteUser(usuario.id).then(() => {
       this.obtenerUsuarios();
@@ -99,16 +103,37 @@ export class Tab4Page implements OnInit {
   }
 
   aprobarSolicitud(solicitud: any) {
-    this.firestore.collection('solicitudes_adopcion').doc(solicitud.id).update({ estado: 'Aprobada' }).then(() => {
-      this.obtenerSolicitudesAdopcion(); // Refresca las solicitudes después de aprobar
-    });
+    if (solicitud.id) {
+      console.log('Aprobando solicitud con ID:', solicitud.id);  // Verifica el ID
+      this.firestore.collection('solicitudes_adopcion').doc(solicitud.id).update({ estado: 'Aprobada' })
+        .then(() => {
+          console.log('Solicitud aprobada');
+          this.obtenerSolicitudesAdopcion(); // Refresca las solicitudes después de aprobar
+        })
+        .catch(error => {
+          console.error('Error al aprobar solicitud: ', error);
+        });
+    } else {
+      console.error('ID de solicitud no encontrado.');
+    }
   }
-
+  
   rechazarSolicitud(solicitud: any) {
-    this.firestore.collection('solicitudes_adopcion').doc(solicitud.id).update({ estado: 'Rechazada' }).then(() => {
-      this.obtenerSolicitudesAdopcion(); // Refresca las solicitudes después de rechazar
-    });
+    if (solicitud.id) {
+      console.log('Rechazando solicitud con ID:', solicitud.id);  // Verifica el ID
+      this.firestore.collection('solicitudes_adopcion').doc(solicitud.id).update({ estado: 'Rechazada' })
+        .then(() => {
+          console.log('Solicitud rechazada');
+          this.obtenerSolicitudesAdopcion(); // Refresca las solicitudes después de rechazar
+        })
+        .catch(error => {
+          console.error('Error al rechazar solicitud: ', error);
+        });
+    } else {
+      console.error('ID de solicitud no encontrado.');
+    }
   }
+  
 
   logout() {
     this.fireService.logout().then(() => {

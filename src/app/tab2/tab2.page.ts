@@ -32,33 +32,70 @@ export class Tab2Page implements OnInit {
     });
   }
 
-  obtenerPublicaciones() {
-    this.firestore.collection('publicaciones').valueChanges().subscribe((publicaciones: any[]) => {
-      this.publicaciones = publicaciones.map((publicacion: any) => ({
-        ...publicacion,
-        nombreUsuario: publicacion.nombreUsuario || 'Usuario desconocido',
-        nombreMascota: publicacion.nombreMascota || 'Nombre desconocido',
-        razaMascota: publicacion.razaMascota || 'Desconocida',
-        edadMascota: publicacion.edadMascota || 'No disponible',
-        tipoMascota: publicacion.tipoMascota || 'No especificado',
-        estadoSaludMascota: publicacion.estadoSaludMascota || 'No disponible',
-        descripcionMascota: publicacion.descripcionMascota || 'Sin descripción',
-      }));
-    });
+  darMeGusta(publicacion: { id: string; likes: string[] }) {
+    if (!this.user) {
+      this.mostrarToast('Debe iniciar sesión para dar "Me gusta"');
+      return;
+    }
+  
+    const userId = this.user.uid;
+    const likes = publicacion.likes || [];
+  
+    // Verifica si el usuario ya ha dado "Me gusta"
+    if (likes.includes(userId)) {
+      this.mostrarToast('Ya ha dado "Me gusta" a esta publicación');
+      return;
+    }
+  
+    // Agrega el ID del usuario al array de likes
+    likes.push(userId);
+  
+    // Actualiza la publicación en Firestore
+    this.firestore.collection('publicaciones').doc(publicacion.id).update({ likes })
+      .then(() => {
+        this.mostrarToast('Has dado "Me gusta" a la publicación');
+      })
+      .catch((error) => {
+        console.error('Error al dar "Me gusta":', error);
+        this.mostrarToast('Error al dar "Me gusta"');
+      });
   }
+  
+  
+  quitarMeGusta(publicacion: any) {
+    if (!this.user) {
+      this.mostrarToast('Debe iniciar sesión para quitar "Me gusta"');
+      return;
+    }
+  
+    const userId = this.user.uid;
+    const likes = publicacion.likes || [];
+  
+    // Verifica si el usuario ya ha dado "Me gusta"
+    if (!likes.includes(userId)) {
+      this.mostrarToast('No ha dado "Me gusta" a esta publicación');
+      return;
+    }
+  
+    // Elimina el ID del usuario del array de likes
+    const newLikes = likes.filter((id: string) => id !== userId);
 
-  // Función para mostrar imagen
-  async mostrarImagen(imagenURL: string) {
-    const modal = await this.modalController.create({
-      component: ImageViewerModalPage,  // Modal para mostrar la imagen
-      componentProps: {
-        imagenURL: imagenURL
-      }
-    });
-    return await modal.present();
+  
+    // Actualiza la publicación en Firestore
+    this.firestore.collection('publicaciones').doc(publicacion.id).update({ likes: newLikes })
+      .then(() => {
+        this.mostrarToast('Has quitado "Me gusta" a la publicación');
+      })
+      .catch((error) => {
+        console.error('Error al quitar "Me gusta":', error);
+        this.mostrarToast('Error al quitar "Me gusta"');
+      });
   }
+  
 
   async mostrarInformacion(publicacion: any) {
+    const userHasLiked = publicacion.likes.includes(this.user?.uid);  // Verifica si el usuario ya dio "Me gusta"
+  
     const actionSheet = await this.actionSheetController.create({
       header: 'Detalles de la publicación',
       buttons: [
@@ -77,15 +114,94 @@ export class Tab2Page implements OnInit {
           },
         },
         {
+          text: userHasLiked ? 'Quitar "Me gusta"' : 'Dar "Me gusta"',  // Texto según el estado
+          icon: userHasLiked ? 'heart-dislike' : 'heart',  // Icono según el estado
+          handler: () => {
+            this.toggleMeGusta(publicacion);  // Alternar entre "Me gusta" y "Quitar Me gusta"
+          },
+        },
+        {
+          text: 'Solicitar adopción',  // Opción para solicitar adopción
+          icon: 'paw',
+          handler: () => {
+            this.solicitarAdopcion(publicacion);  // Llamar a solicitarAdopcion
+          },
+        },
+        {
           text: 'Cancelar',
           icon: 'close',
           role: 'cancel',
         },
       ],
     });
-
+  
     await actionSheet.present();
   }
+  
+  toggleMeGusta(publicacion: { id: string; likes: string[] }) {
+    if (!this.user) {
+      this.mostrarToast('Debe iniciar sesión para dar o quitar "Me gusta"');
+      return;
+    }
+  
+    const userId = this.user.uid;
+    const likes = publicacion.likes || [];
+  
+    // Verificar si el usuario ya ha dado "Me gusta"
+    if (likes.includes(userId)) {
+      // Si ya ha dado "Me gusta", quítalo
+      const newLikes = likes.filter((id: string) => id !== userId);
+      this.firestore.collection('publicaciones').doc(publicacion.id).update({ likes: newLikes })
+        .then(() => {
+          this.mostrarToast('Has quitado "Me gusta" a la publicación');
+        })
+        .catch((error) => {
+          console.error('Error al quitar "Me gusta":', error);
+          this.mostrarToast('Error al quitar "Me gusta"');
+        });
+    } else {
+      // Si no ha dado "Me gusta", agrégalo
+      likes.push(userId);
+      this.firestore.collection('publicaciones').doc(publicacion.id).update({ likes })
+        .then(() => {
+          this.mostrarToast('Has dado "Me gusta" a la publicación');
+        })
+        .catch((error) => {
+          console.error('Error al dar "Me gusta":', error);
+          this.mostrarToast('Error al dar "Me gusta"');
+        });
+    }
+  }
+  
+
+  obtenerPublicaciones() {
+    this.firestore.collection('publicaciones').valueChanges().subscribe((publicaciones: any[]) => {
+      this.publicaciones = publicaciones.map((publicacion: any) => ({
+        ...publicacion,
+        nombreUsuario: publicacion.nombreUsuario || 'Usuario desconocido',
+        nombreMascota: publicacion.nombreMascota || 'Nombre desconocido',
+        razaMascota: publicacion.razaMascota || 'Desconocida',
+        edadMascota: publicacion.edadMascota || 'No disponible',
+        tipoMascota: publicacion.tipoMascota || 'No especificado',
+        estadoSaludMascota: publicacion.estadoSaludMascota || 'No disponible',
+        descripcionMascota: publicacion.descripcionMascota || 'Sin descripción',
+        likes: publicacion.likes || []  // Inicializa los likes si no existen
+      }));
+    });
+  }
+  
+
+  // Función para mostrar imagen
+  async mostrarImagen(imagenURL: string) {
+    const modal = await this.modalController.create({
+      component: ImageViewerModalPage,  // Modal para mostrar la imagen
+      componentProps: {
+        imagenURL: imagenURL
+      }
+    });
+    return await modal.present();
+  }
+
 
   // Función para solicitar adopción
   solicitarAdopcion(publicacion: any) {
