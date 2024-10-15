@@ -12,18 +12,6 @@ export class AuthService {
     private router: Router
   ) { }
 
-  logout(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      try {
-        // Eliminar el token de autenticación (puede ser localStorage, cookies, etc.)
-        localStorage.removeItem('authToken');
-        resolve();
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
   // Implementación de cambiar contraseña
   cambiarContrasena(newPassword: string): Promise<void> {
     return this.afAuth.currentUser.then((user) => {
@@ -45,4 +33,17 @@ export class AuthService {
     // Verificar si el token de autenticación está presente
     return !!localStorage.getItem('authToken');
   }
+
+  logout(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        localStorage.removeItem('usuario'); // Elimina el usuario de localStorage
+        this.router.navigate(['/login']); // Redirige al login
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  
 }

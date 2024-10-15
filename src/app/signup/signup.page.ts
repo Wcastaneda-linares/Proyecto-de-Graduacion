@@ -57,23 +57,24 @@ export class SignupPage {
   }
 
   onSubmit() {
-    this.firebaseError = null; // Reinicia el mensaje de error de Firebase
+    this.firebaseError = null; // Reinicia el mensaje de error
     if (this.signupForm.valid) {
       const { email, password, name, birthDate } = this.signupForm.value;
-      // Verifica que las contraseñas coincidan directamente aquí si prefieres
       const confirmPassword = this.signupForm.get('confirmPassword')?.value;
-      if (password !== null && confirmPassword !== null && password !== confirmPassword) {
+  
+      if (password !== confirmPassword) {
         this.firebaseError = 'Las contraseñas no coinciden.';
-        return; // Detiene la ejecución si las contraseñas no coinciden
+        return;
       }
+  
       this.fireService.signUP({ email, password })
         .then((res) => {
           if (res && res.user) {
-            const data = { email, name, uid: res.user.uid, birthDate }; // Asegúrate de incluir todos los datos necesarios
-            // Guarda los detalles adicionales del usuario en tu base de datos
+            const data = { email, name, uid: res.user.uid, birthDate };
             this.fireService.saveDetails(data)
               .then(() => {
-                this.router.navigate(['/tabs/tab1']); // Navega a la página deseada tras el registro exitoso
+                localStorage.setItem('usuario', name); // Guarda el nombre en localStorage
+                this.router.navigate(['/tabs/tab1']);
               })
               .catch((error) => {
                 console.error('Error al guardar los detalles del usuario:', error);
@@ -86,12 +87,9 @@ export class SignupPage {
           this.firebaseError = this.translateFirebaseError(error.code);
         });
     } else {
-      // Marca todos los campos como tocados para mostrar los mensajes de validación
       Object.keys(this.signupForm.controls).forEach(key => {
         const control = this.signupForm.get(key);
-        if (control) {
-          control.markAsTouched();
-        }
+        if (control) control.markAsTouched();
       });
     }
   }

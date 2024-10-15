@@ -22,11 +22,13 @@ export class Tab1Page {
   async tomarFoto() {
     const imagenURL = await this.photoService.tomarFoto(); // Usa el servicio
     if (imagenURL) {
-      this.navCtrl.navigateForward('/llenar-informacion', {
+      this.router.navigate(['/tabs/llenar-informacion'], {  // Asegúrate de que la ruta esté en /tabs/
         state: { imagenURL },
       });
     }
   }
+  
+
 
   logout() {
     this.authService.logout().then(() => {

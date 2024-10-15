@@ -1,30 +1,12 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { ChatPageModule } from './chat/chat.module'; // Asegúrate de que la ruta y el nombre del módulo sean correctos
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'; // Asegúrate de que Capacitor Camera esté instalado correctamente
-import { AuthGuard } from './user-service/auth.guard'; // Asegúrate de la ruta correcta
-
+import { AuthGuard } from './user-service/auth.guard'; // Asegúrate de que la ruta esté correcta.
 
 const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',
-
-  },
-  {
-    path: 'tab4',
-    loadChildren: () => import('./tab4/tab4.module').then(m => m.Tab4PageModule),
-    canActivate: [AuthGuard]  // Protege la ruta
-  },
-  {
-    path: 'solicitudes-adopcion',
-    loadChildren: () => import('./solicitudes-adopcion/solicitudes-adopcion.module').then(m => m.SolicitudesAdopcionPageModule)
-  },
-  {
-    path: '',
-    loadChildren: () =>
-      import('./tabs/tabs.module').then((m) => m.TabsPageModule),
   },
   {
     path: 'login',
@@ -45,27 +27,55 @@ const routes: Routes = [
   },
   {
     path: 'informacion-modal',
-    loadChildren: () => import('./informacion-modal/informacion-modal.module').then( m => m.InformacionModalPageModule)
+    loadChildren: () =>
+      import('./informacion-modal/informacion-modal.module').then(
+        (m) => m.InformacionModalPageModule
+      ),
   },
   {
     path: 'image-viewer-modal',
-    loadChildren: () => import('./image-viewer-modal/image-viewer-modal.module').then( m => m.ImageViewerModalPageModule)
+    loadChildren: () =>
+      import('./image-viewer-modal/image-viewer-modal.module').then(
+        (m) => m.ImageViewerModalPageModule
+      ),
   },
   {
     path: 'chat',
-    loadChildren: () => import('./chat/chat.module').then( m => m.ChatPageModule)
+    loadChildren: () =>
+      import('./chat/chat.module').then((m) => m.ChatPageModule),
   },
-  
   {
-    path: 'user-service',
-    loadChildren: () => import('./user-service/user-service.module').then( m => m.UserServicePageModule)
+    path: 'tab4',
+    loadChildren: () =>
+      import('./tab4/tab4.module').then((m) => m.Tab4PageModule),
+    canActivate: [AuthGuard], // Protege la ruta
   },
   {
     path: 'solicitudes-adopcion',
-    loadChildren: () => import('./solicitudes-adopcion/solicitudes-adopcion.module').then( m => m.SolicitudesAdopcionPageModule)
+    loadChildren: () =>
+      import(
+        './solicitudes-adopcion/solicitudes-adopcion.module'
+      ).then((m) => m.SolicitudesAdopcionPageModule),
+  },
+  {
+    path: 'tabs',
+    loadChildren: () =>
+      import('./tabs/tabs.module').then((m) => m.TabsPageModule),
+  },
+  {
+    path: 'user-service',
+    loadChildren: () =>
+      import('./user-service/user-service.module').then(
+        (m) => m.UserServicePageModule
+      ),
+  },
+  {
+    path: 'registrar-centro-modal',
+    loadChildren: () => import('./registrar-centro-modal/registrar-centro-modal.module').then( m => m.RegistrarCentroModalPageModule)
   },
 
 ];
+
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),

@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Registrar hogar para animales</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarModal()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form (ngSubmit)="registrarCentro()" #form="ngForm" class="form-container">
+    <ion-item>
+      <ion-label position="stacked">Nombre del Centro</ion-label>
+      <ion-input [(ngModel)]="nombreCentro" name="nombreCentro" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Dirección</ion-label>
+      <ion-input [(ngModel)]="direccionCentro" name="direccionCentro" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Teléfono</ion-label>
+      <ion-input [(ngModel)]="telefonoCentro" name="telefonoCentro" type="tel" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Correo Electrónico</ion-label>
+      <ion-input [(ngModel)]="correoCentro" name="correoCentro" type="email" required></ion-input>
+    </ion-item>
+
+    <ion-item-divider>
+      <ion-label>Tipo de Centro</ion-label>
+    </ion-item-divider>
+    <ion-list>
+      <ion-item *ngFor="let tipo of opcionesTipoCentro">
+        <ion-checkbox
+          slot="start"
+          [ngModel]="tipoCentro.includes(tipo)"
+          (ionChange)="toggleCheckbox(tipoCentro, tipo)">
+        </ion-checkbox>
+        <ion-label>{{ tipo }}</ion-label>
+      </ion-item>
+    </ion-list>
+    
+    <ion-item-divider>
+      <ion-label>Servicios Ofrecidos</ion-label>
+    </ion-item-divider>
+    <ion-list>
+      <ion-item *ngFor="let servicio of opcionesServicios">
+        <ion-checkbox
+          slot="start"
+          [ngModel]="servicios.includes(servicio)"
+          (ionChange)="toggleCheckbox(servicios, servicio)">
+        </ion-checkbox>
+        <ion-label>{{ servicio }}</ion-label>
+      </ion-item>
+    </ion-list>
+    
+
+    <ion-item>
+      <ion-label position="stacked">Horario de Atención</ion-label>
+      <ion-input [(ngModel)]="horarioAtencion" name="horarioAtencion" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Observaciones</ion-label>
+      <ion-textarea [(ngModel)]="observaciones" name="observaciones" required></ion-textarea>
+    </ion-item>
+
+    <ion-button expand="full" type="submit" [disabled]="!form.valid" class="ion-margin-top">
+      Registrar Centro
+    </ion-button>
+  </form>
+</ion-content>

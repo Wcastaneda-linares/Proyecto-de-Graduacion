@@ -2,36 +2,57 @@
 .custom-background {
   --background: url('https://png.pngtree.com/thumb_back/fw800/back_our/20190620/ourmid/pngtree-functional-dog-food-promotion-main-map-image_144794.jpg') no-repeat center center/cover;
   background-attachment: fixed;
+  background-size: cover;
 }
 
-/* Tarjetas para solicitudes */
-.card-solicitud {
+/* Tarjetas generales (usuarios, publicaciones, solicitudes) */
+.usuario-card, .publicacion-card, .solicitud-card {
   margin-bottom: 20px;
-  border-radius: 15px; /* Aumenta la curvatura para un diseño más moderno */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombras más suaves y elegantes */
-  padding: 15px; /* Añade un relleno interno */
-  background-color: rgba(255, 255, 255, 0.85); /* Fondo más sólido para mejor legibilidad */
+  border-radius: 15px; /* Bordes redondeados */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombra elegante */
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.85); /* Fondo semitransparente */
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Espacio entre elementos */
 }
 
+/* Imagen de la mascota: Expandida en todo el contenedor */
 .mascota-img {
-  width: 100%;         /* Asegura que la imagen ocupe todo el ancho del contenedor */
-  max-width: 300px;    /* Tamaño máximo deseado (ajusta según lo que necesites) */
-  height: auto;        /* Mantiene la proporción de la imagen */
-  object-fit: cover;   /* Ajusta la imagen para cubrir todo el espacio disponible */
-  border-radius: 10px; /* Opcional: agrega bordes redondeados para un estilo más suave */
+  width: 100%;          /* Ocupa todo el ancho disponible */
+  height: 100%;         /* Ocupa todo el alto disponible */
+  object-fit: cover;     /* Asegura que la imagen cubra todo el espacio sin distorsionarse */
+  border-radius: 10px;   /* Bordes redondeados */
+  display: block;        /* Asegura que se comporte como un bloque */
+  position: relative;    /* Permite posicionamiento relativo si es necesario */
 }
 
-/* Texto del contenido */
-.card-solicitud h2 {
+/* Contenedor de botones */
+.botones-container {
+  display: flex;
+  justify-content: space-between; /* Espacio igual entre botones */
+  gap: 10px; /* Separación entre botones */
+  margin-top: 15px;
+}
+
+/* Botones personalizados */
+.botones-container ion-button {
+  width: 48%; /* Mitad del contenedor */
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Títulos y textos */
+.usuario-card h2, .publicacion-card h2, .solicitud-card h2 {
   font-size: 1.2rem;
   font-weight: bold;
   color: #333;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
-.card-solicitud p {
+.usuario-card p, .publicacion-card p, .solicitud-card p {
   color: #555;
-  margin: 5px 0;
+  margin: 3px 0;
 }
 
 /* Estado de la solicitud con colores */
@@ -47,17 +68,39 @@
   color: red;
 }
 
-/* Botones de acción */
-.action-buttons {
-  display: flex;
-  justify-content: space-between; /* Separa los botones para evitar que se amontonen */
-  padding: 10px 0;
-  margin-top: 15px; /* Añade espacio entre el contenido y los botones */
+/* Encabezado */
+ion-header {
+  --background: #3880ff;
+  color: white;
 }
 
-.action-buttons ion-button {
-  width: 45%; /* Botones más grandes y con mejor ajuste */
-  font-weight: bold;
+/* Título */
+ion-title {
+  font-size: 1.4rem;
+}
+
+/* Segmentos */
+ion-segment-button {
+  font-size: 1rem;
+  padding: 0 10px;
+}
+
+ion-segment {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/* Listas */
+ion-list {
+  background: rgba(255, 255, 255, 0.15); /* Fondo semitransparente */
+  backdrop-filter: blur(8px); /* Efecto de desenfoque */
+  padding: 10px;
+  border-radius: 10px; /* Bordes suaves */
+}
+
+/* Mejorar espacio en el título */
+ion-toolbar {
+  padding: 10px;
 }
 
 /* Estado vacío */
@@ -68,40 +111,12 @@
   color: #666;
 }
 
-/* Ajustes del encabezado */
-ion-header {
-  --background: #3880ff;
-  color: white;
+/* Botones de acción en hover */
+ion-button:hover {
+  opacity: 0.9; /* Efecto sutil de hover */
 }
 
-ion-title {
-  font-size: 1.4rem;
-}
-
-ion-segment-button {
-  font-size: 1rem;
-  padding: 0 10px;
-}
-
-/* Para el fondo del ion-content */
-ion-content {
-  --background: transparent;
-}
-
-ion-list {
-  background: rgba(255, 255, 255, 0.15); /* Fondo más transparente para mayor contraste con el fondo */
-  backdrop-filter: blur(8px); /* Desenfoque más suave */
-  padding: 10px; /* Añade relleno interno */
-  border-radius: 10px; /* Redondea los bordes para un look más moderno */
-}
-
-/* Mejorar el espacio del título */
-ion-toolbar {
-  padding: 10px;
-}
-
-/* Mejorar espacio entre secciones */
-ion-segment {
-  margin-top: 10px;
-  margin-bottom: 20px;
+/* Iconos de los botones */
+ion-icon {
+  margin-right: 5px; /* Espacio entre el icono y el texto */
 }

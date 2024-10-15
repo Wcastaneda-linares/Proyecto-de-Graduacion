@@ -9,28 +9,26 @@
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-
 <ion-content [fullscreen]="true" class="custom-background">
-  <!-- Lista de publicaciones -->
   <ion-list *ngIf="publicaciones && publicaciones.length > 0">
     <ion-card *ngFor="let publicacion of publicaciones" class="card-transparente">
       <ion-grid>
         <ion-row>
           <ion-col size="12" size-md="4">
-            <!-- Imagen de la mascota -->
             <ion-img [src]="publicacion.imagenURL || 'assets/default-avatar.png'" class="mascota-img"></ion-img>
           </ion-col>
 
           <ion-col size="12" size-md="8">
-            <!-- Descripciones de la mascota -->
             <ion-card-content>
-              <h2>{{ publicacion.nombreMascota || 'Nombre desconocido' }}</h2>
-              <p><strong>Raza:</strong> {{ publicacion.razaMascota || 'Desconocida' }}</p>
-              <p><strong>Edad:</strong> {{ publicacion.edadMascota || 'No disponible' }} años</p>
-              <p><strong>Tipo:</strong> {{ publicacion.tipoMascota || 'No especificado' }}</p>
-              <p><strong>Estado de salud:</strong> {{ publicacion.estadoSaludMascota || 'No disponible' }}</p>
-              <p><strong>Descripción:</strong> {{ publicacion.descripcionMascota || 'Sin descripción' }}</p>
-              <p><strong>Donado por:</strong> {{ publicacion.nombreUsuario || 'Usuario desconocido' }}</p>
+              <h2>{{ publicacion.nombreMascota }}</h2>
+              <p><strong>Raza:</strong> {{ publicacion.razaMascota }}</p>
+              <p><strong>Edad:</strong> {{ publicacion.edadMascota }} años</p>
+              <p><strong>Sexo:</strong> {{ publicacion.sexoMascota }}</p>
+              <p><strong>Personalidad:</strong> {{ publicacion.personalidadMascota }}</p>
+              <p><strong>Tipo:</strong> {{ publicacion.tipoMascota }}</p>
+              <p><strong>Estado de salud:</strong> {{ publicacion.estadoSaludMascota }}</p>
+              <p><strong>Descripción:</strong> {{ publicacion.descripcionMascota }}</p>
+              <p><strong>Donado por:</strong> {{ publicacion.nombreDonante }}</p>
               <p><strong>Me gusta:</strong> {{ publicacion.likes?.length || 0 }}</p>
             </ion-card-content>
           </ion-col>
@@ -38,18 +36,8 @@
 
         <ion-row>
           <ion-col size="12">
-            <!-- Botón para más detalles -->
             <ion-button expand="block" color="primary" (click)="mostrarInformacion(publicacion)">
               Ver más detalles
-            </ion-button>
-          </ion-col>
-        </ion-row>
-
-        <ion-row>
-          <ion-col size="12" text-right>
-            <!-- Botón para compartir -->
-            <ion-button fill="clear" (click)="compartirPublicacion(publicacion)">
-              <ion-icon slot="icon-only" name="share"></ion-icon>
             </ion-button>
           </ion-col>
         </ion-row>
@@ -57,7 +45,6 @@
     </ion-card>
   </ion-list>
 
-  <!-- Mensaje si no hay publicaciones disponibles -->
   <ion-list *ngIf="!publicaciones || publicaciones.length === 0">
     <ion-item>
       <ion-label>No hay animales disponibles para donación en este momento.</ion-label>

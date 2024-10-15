@@ -7,11 +7,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { IonicModule } from '@ionic/angular';
 import { environment } from '../environments/environment';
+import { ActualizarCentroModalComponent } from './actualizar-centro-modal/actualizar-centro-modal.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    // Elimina UpdatePublicacionModalComponent de aquí
+    // Declaración del componente modal
   ],
   imports: [
     BrowserModule,
@@ -22,6 +23,6 @@ import { environment } from '../environments/environment';
   ],
   providers: [],
   bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 
 @Component({
@@ -6,33 +6,42 @@ import { ModalController } from '@ionic/angular';
   templateUrl: './update-publicacion-modal.component.html',
   styleUrls: ['./update-publicacion-modal.component.scss'],
 })
-export class UpdatePublicacionModalComponent {
-
-  @Input() publicacion: any;  // Recibe la publicación desde el modal
+export class UpdatePublicacionModalComponent implements OnInit {
+  @Input() publicacion: any; // Recibe la publicación desde el modal
+  archivoDocumento: File | null = null;
 
   constructor(private modalCtrl: ModalController) {}
 
-  cerrarModal() {
-    this.modalCtrl.dismiss();  // Cierra el modal
+  ngOnInit() {
+    console.log('Datos recibidos en el modal:', this.publicacion);
+
+    if (!this.publicacion.mascota) this.publicacion.mascota = {};
+    if (!this.publicacion.donante) this.publicacion.donante = {};
   }
 
+  esImagen(url: string): boolean {
+    return /\.(jpg|jpeg|png|gif)$/i.test(url);
+  }
 
-  
+  cerrarModal() {
+    this.modalCtrl.dismiss();
+  }
+
+  cargarDocumento(event: any) {
+    const file = event.target.files[0];
+    if (file.size <= 1048576) {
+      this.archivoDocumento = file;
+    } else {
+      alert('El archivo no debe superar 1 MB.');
+    }
+  }
 
   guardarCambios() {
     const publicacionActualizada = {
-      ...this.publicacion, // Incluye todos los campos de la publicación actual
-      donante: {
-        nombre: this.publicacion.nombreDonante || 'Desconocido',
-        numeroContacto: this.publicacion.numeroDonante || 'No disponible',
-        correo: this.publicacion.correoDonante || 'No disponible',
-        direccion: this.publicacion.direccionDonante || 'No disponible',
-        numeroDocumentoIdentificacion: this.publicacion.numeroDocumentoIdentificacion || 'No disponible',
-      }
+      ...this.publicacion,
+      donante: { ...this.publicacion.donante },
     };
-  
-    // Envia los datos actualizados al controlador de modal
+
     this.modalCtrl.dismiss(publicacionActualizada);
   }
-  
 }

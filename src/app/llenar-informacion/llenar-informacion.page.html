@@ -1,81 +1,104 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title class="form-title">Formulario de Publicación</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Formulario de Publicación</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="custom-background">
   <div class="form-container">
-    <!-- Información de la mascota -->
-    <ion-item>
-      <ion-label position="floating">Nombre de la Mascota</ion-label>
-      <ion-input [(ngModel)]="nombreMascota"></ion-input>
-    </ion-item>
+    <ion-list>
+      <ion-item-divider>
+        <ion-label>Información de la Mascota</ion-label>
+      </ion-item-divider>
 
-    <ion-item>
-      <ion-label position="floating">Raza</ion-label>
-      <ion-input [(ngModel)]="razaMascota"></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="floating">Nombre</ion-label>
+        <ion-input [(ngModel)]="nombreMascota" required></ion-input>
+      </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Edad</ion-label>
-      <ion-input type="number" [(ngModel)]="edadMascota"></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="floating">Raza</ion-label>
+        <ion-input [(ngModel)]="razaMascota"></ion-input>
+      </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Descripción</ion-label>
-      <ion-textarea [(ngModel)]="descripcionMascota"></ion-textarea>
-    </ion-item>
+      <ion-item>
+        <ion-label position="floating">Edad (años)</ion-label>
+        <ion-input type="number" [(ngModel)]="edadMascota"></ion-input>
+      </ion-item>
 
-    <!-- Tipo de mascota -->
-    <ion-item>
-      <ion-label>Tipo de Mascota</ion-label>
-      <ion-select [(ngModel)]="tipoMascota">
-        <ion-select-option value="Perro">Perro</ion-select-option>
-        <ion-select-option value="Gato">Gato</ion-select-option>
-        <ion-select-option value="Ave">Ave</ion-select-option>
-        <ion-select-option value="Otro">Otro</ion-select-option>
-      </ion-select>
-    </ion-item>
+      <ion-item>
+        <ion-label>Sexo</ion-label>
+        <ion-select [(ngModel)]="sexoMascota">
+          <ion-select-option value="Macho">Macho</ion-select-option>
+          <ion-select-option value="Hembra">Hembra</ion-select-option>
+        </ion-select>
+      </ion-item>
 
-    <!-- Estado de salud -->
-    <ion-item>
-      <ion-label>Estado de Salud</ion-label>
-      <ion-select [(ngModel)]="estadoSaludMascota">
-        <ion-select-option value="Sano">Sano</ion-select-option>
-        <ion-select-option value="Enfermo">Enfermo</ion-select-option>
-        <ion-select-option value="Recuperación">En recuperación</ion-select-option>
-      </ion-select>
-    </ion-item>
+      <ion-item>
+        <ion-label>Tipo de Mascota</ion-label>
+        <ion-select [(ngModel)]="tipoMascota" required>
+          <ion-select-option value="Perro">Perro</ion-select-option>
+          <ion-select-option value="Gato">Gato</ion-select-option>
+          <ion-select-option value="Ave">Ave</ion-select-option>
+          <ion-select-option value="Otro">Otro</ion-select-option>
+        </ion-select>
+      </ion-item>
 
-    <!-- Información del donante -->
-    <ion-item>
-      <ion-label position="floating">Nombre del Donante</ion-label>
-      <ion-input [(ngModel)]="nombreDonante"></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label>Estado de Salud</ion-label>
+        <ion-select [(ngModel)]="estadoSaludMascota" required>
+          <ion-select-option value="Sano">Sano</ion-select-option>
+          <ion-select-option value="Enfermo">Enfermo</ion-select-option>
+          <ion-select-option value="Recuperación">En recuperación</ion-select-option>
+        </ion-select>
+      </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Número de Contacto del Donante</ion-label>
-      <ion-input [(ngModel)]="numeroDonante"></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label>Personalidad</ion-label>
+        <ion-select [(ngModel)]="personalidadMascota" multiple="true">
+          <ion-select-option value="Juguetón">Juguetón</ion-select-option>
+          <ion-select-option value="Amable">Amable</ion-select-option>
+          <ion-select-option value="Bravo">Bravo</ion-select-option>
+          <ion-select-option value="De buen humor">De buen humor</ion-select-option>
+        </ion-select>
+      </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Correo del Donante</ion-label>
-      <ion-input [(ngModel)]="correoDonante" type="email"></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="floating">Descripción</ion-label>
+        <ion-textarea [(ngModel)]="descripcionMascota"></ion-textarea>
+      </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Dirección del Donante</ion-label>
-      <ion-input [(ngModel)]="direccionDonante"></ion-input>
-    </ion-item>
+      <ion-item-divider>
+        <ion-label>Información del Donante</ion-label>
+      </ion-item-divider>
 
-    <!-- Campo para ingresar el número del documento de identificación -->
-    <ion-item>
-      <ion-label position="floating">Número del Documento de Identificación</ion-label>
-      <ion-input type="text" [(ngModel)]="numeroDocumentoIdentificacion"></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="floating">Nombre</ion-label>
+        <ion-input [(ngModel)]="nombreDonante" required></ion-input>
+      </ion-item>
 
-    <!-- Botón para crear la publicación -->
-    <ion-button expand="full" (click)="crearPublicacion()">Crear Publicación</ion-button>
+      <ion-item>
+        <ion-label position="floating">Número de Contacto</ion-label>
+        <ion-input [(ngModel)]="numeroDonante"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Dirección</ion-label>
+        <ion-input [(ngModel)]="direccionDonante"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Subir Documento (PDF o Imagen)</ion-label>
+        <input type="file" (change)="cargarDocumento($event)" accept="image/*,application/pdf" />
+      </ion-item>
+
+      <ion-item *ngIf="!documentoURL">
+        <ion-label color="danger">* Documento requerido</ion-label>
+      </ion-item>
+
+      <ion-button expand="full" (click)="crearPublicacion()" class="ion-margin-top">
+        Crear Publicación
+      </ion-button>
+    </ion-list>
   </div>
 </ion-content>

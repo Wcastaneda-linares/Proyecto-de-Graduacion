@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
-import { FireserviceService } from '../fireservice.service'; // Importa el servicio FireserviceService
+import { FireserviceService } from '../fireservice.service';
 
 @Component({
   selector: 'app-llenar-informacion',
@@ -11,24 +11,22 @@ import { FireserviceService } from '../fireservice.service'; // Importa el servi
   styleUrls: ['./llenar-informacion.page.scss'],
 })
 export class LlenarInformacionPage {
-  // Datos de la publicación
   imagenURL: string | undefined;
-  usuarioLogueado: any; // Variable para almacenar el usuario logueado
+  documentoURL: string | undefined;
+  usuarioLogueado: any;
 
-  // Información adicional sobre la mascota
   nombreMascota: string = '';
   razaMascota: string = '';
   edadMascota: number | null = null;
+  sexoMascota: string = '';
+  personalidadMascota: string[] = [];
   descripcionMascota: string = '';
-  tipoMascota: string = '';  // Campo para el tipo de mascota
-  estadoSaludMascota: string = '';  // Campo para el estado de salud
+  tipoMascota: string = '';
+  estadoSaludMascota: string = '';
 
-  // Información del donante
   nombreDonante: string = '';
   numeroDonante: string = '';
-  correoDonante: string = '';
   direccionDonante: string = '';
-  numeroDocumentoIdentificacion: string = '';  // Campo para el número del documento de identificación
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -36,84 +34,64 @@ export class LlenarInformacionPage {
     private storage: AngularFireStorage,
     private firestore: AngularFirestore,
     private toastController: ToastController,
-    private fireService: FireserviceService // Inyecta el servicio FireserviceService
+    private fireService: FireserviceService
   ) {
     const state = this.router.getCurrentNavigation()?.extras.state;
     if (state) {
       this.imagenURL = state['imagenURL'];
     }
 
-    // Obtener el usuario logueado
     this.fireService.getUsuarioLogueado().then((user) => {
       this.usuarioLogueado = user;
     });
   }
 
-  // Método para crear la publicación
-  async crearPublicacion() {
-    // Depuración: Mostramos en la consola el estado de los campos para verificar
-    console.log('Imagen URL:', this.imagenURL);
-    console.log('Nombre de la Mascota:', this.nombreMascota);
-    console.log('Raza de la Mascota:', this.razaMascota);
-    console.log('Edad de la Mascota:', this.edadMascota);
-    console.log('Descripción de la Mascota:', this.descripcionMascota);
-    console.log('Tipo de Mascota:', this.tipoMascota);
-    console.log('Estado de Salud:', this.estadoSaludMascota);
-    console.log('Nombre del Donante:', this.nombreDonante);
-    console.log('Número de Contacto del Donante:', this.numeroDonante);
-    console.log('Correo del Donante:', this.correoDonante);
-    console.log('Dirección del Donante:', this.direccionDonante);
-    console.log('Número del Documento de Identificación:', this.numeroDocumentoIdentificacion);
+  async cargarDocumento(event: any) {
+    const file = event.target.files[0];
+    if (file && file.size <= 1 * 1024 * 1024) {
+      const filePath = `documentos/${Date.now()}_${file.name}`;
+      const fileRef = this.storage.ref(filePath);
+      const task = await fileRef.put(file);
 
-    // Verificar si todos los campos están llenos
-    if (
-      !this.imagenURL ||
-      !this.nombreMascota ||
-      !this.razaMascota ||
-      this.edadMascota === null ||  // Validamos que la edad no sea nula
-      !this.descripcionMascota ||
-      !this.tipoMascota ||
-      !this.estadoSaludMascota ||
-      !this.nombreDonante ||
-      !this.numeroDonante ||
-      !this.correoDonante ||
-      !this.direccionDonante ||
-      !this.numeroDocumentoIdentificacion
-    ) {
-      this.mostrarToast('Por favor, complete todos los campos');
+      this.documentoURL = await task.ref.getDownloadURL();
+      console.log('Documento subido: ', this.documentoURL);
+      this.mostrarToast('Documento subido correctamente');
+    } else {
+      this.mostrarToast('El archivo debe ser menor a 1 MB');
+    }
+  }
+  async crearPublicacion() {
+    console.log('Tipo de Mascota:', this.tipoMascota);
+    console.log('Estado Salud:', this.estadoSaludMascota);
+  
+    if (!this.tipoMascota || !this.estadoSaludMascota) {
+      this.mostrarToast('Por favor, seleccione el tipo de mascota y el estado de salud.');
       return;
     }
-
+  
+    const publicacionData = {
+      mascota: {
+        nombre: this.nombreMascota,
+        raza: this.razaMascota,
+        edad: this.edadMascota,
+        sexo: this.sexoMascota,
+        personalidad: this.personalidadMascota,
+        descripcion: this.descripcionMascota,
+        tipo: this.tipoMascota,
+        estadoSalud: this.estadoSaludMascota,
+      },
+      donante: {
+        nombre: this.nombreDonante,
+        numeroContacto: this.numeroDonante,
+        direccion: this.direccionDonante,
+      },
+      documentoURL: this.documentoURL,
+      imagenURL: this.imagenURL,
+      correo: this.usuarioLogueado.email,
+    };
+  
     try {
-      const filePath = `publicaciones/${Date.now()}`;
-      const fileRef = this.storage.ref(filePath);
-      const task = await fileRef.putString(this.imagenURL, 'data_url');
-
-      const downloadURL = await task.ref.getDownloadURL();
-
-      const publicacionData = {
-        mascota: {
-          nombre: this.nombreMascota,
-          raza: this.razaMascota,
-          edad: this.edadMascota,
-          descripcion: this.descripcionMascota,
-          tipo: this.tipoMascota,
-          estadoSalud: this.estadoSaludMascota,
-        },
-        donante: {
-          nombre: this.nombreDonante,
-          numeroContacto: this.numeroDonante,
-          correo: this.correoDonante,
-          direccion: this.direccionDonante,
-          numeroDocumentoIdentificacion: this.numeroDocumentoIdentificacion,  // Guardamos el número de identificación
-        },
-        imagenURL: downloadURL,  // Asignamos la URL de la imagen
-        correo: this.usuarioLogueado.email // Asignamos el correo del usuario logueado
-      };
-
-      // Guardar la publicación en Firestore
       await this.firestore.collection('publicaciones').add(publicacionData);
-
       this.mostrarToast('Publicación creada exitosamente');
       this.router.navigate(['tabs/tab2']);
     } catch (error) {
@@ -121,8 +99,8 @@ export class LlenarInformacionPage {
       this.mostrarToast('Error al crear la publicación');
     }
   }
+  
 
-  // Método para mostrar mensajes emergentes (toast)
   async mostrarToast(mensaje: string) {
     const toast = await this.toastController.create({
       message: mensaje,

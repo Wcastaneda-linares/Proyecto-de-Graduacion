@@ -1,12 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Administración de Usuarios</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">
-        <ion-icon name="log-out-outline"></ion-icon>
-        Cerrar Sesión
-      </ion-button>
-    </ion-buttons>
+
   </ion-toolbar>
 </ion-header>
 
@@ -28,68 +23,90 @@
   <!-- Gestión de usuarios -->
   <ng-container *ngIf="selectedSegment === 'user-management'">
     <ion-list>
-      <ion-item *ngFor="let usuario of usuariosPaginados">
+      <div class="usuario-card" *ngFor="let usuario of usuariosPaginados">
         <ion-label>
           <h2>{{ usuario.name }}</h2>
           <p>{{ usuario.email }}</p>
           <p>Último acceso: {{ usuario.lastSignInTime | date:'short' }}</p>
         </ion-label>
-        <ion-button color="danger" (click)="eliminarUsuario(usuario)">
-          Eliminar
-        </ion-button>
-      </ion-item>
+  
+        <!-- Contenedor de botones -->
+        <div class="botones-container">
+          <ion-button fill="outline" color="danger" (click)="eliminarUsuario(usuario)">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Eliminar
+          </ion-button>
+        </div>
+      </div>
     </ion-list>
   </ng-container>
+  
 
   <!-- Gestión de publicaciones -->
-   
-<!-- Gestión de publicaciones -->
-<ng-container *ngIf="selectedSegment === 'manage-posts'">
-  <ion-list *ngIf="publicaciones && publicaciones.length > 0">
-    <ion-item *ngFor="let publicacion of publicaciones">
-      <!-- Imagen de la mascota -->
-      <ion-img [src]="publicacion.imagenURL || 'assets/default-avatar.png'" class="mascota-img"></ion-img>
-    
-      <!-- Información de la mascota -->
-      <ion-label>
-        <h2>{{ publicacion.nombreMascota || 'Nombre desconocido' }}</h2>
-        <p>Raza: {{ publicacion.razaMascota || 'Desconocida' }}</p>
-        <p>Edad: {{ publicacion.edadMascota || 'No disponible' }} años</p>
-        <p>Tipo: {{ publicacion.tipoMascota || 'No especificado' }}</p>
-        <p>Estado de salud: {{ publicacion.estadoSaludMascota || 'No disponible' }}</p>
-        <p>Descripción: {{ publicacion.descripcionMascota || 'Sin descripción' }}</p>
-      </ion-label>
-    
-      <!-- Botones para eliminar y actualizar -->
-      <ion-button fill="outline" color="primary" (click)="openUpdateModal(publicacion)">
-        Actualizar
-      </ion-button>
-      <ion-button fill="outline" color="danger" (click)="eliminarPublicacion(publicacion)">
-        Eliminar
-      </ion-button>
+  <ng-container *ngIf="selectedSegment === 'manage-posts'">
+    <ion-list *ngIf="publicaciones && publicaciones.length > 0">
+      <div class="publicacion-card" *ngFor="let publicacion of publicaciones">
+        <ion-img [src]="publicacion?.imagenURL || 'assets/default-avatar.png'" class="mascota-img"></ion-img>
+  
+        <ion-label>
+          <h2>{{ publicacion?.mascota?.nombre || 'Nombre desconocido' }}</h2>
+          <p>Raza: {{ publicacion?.mascota?.raza || 'Desconocida' }}</p>
+          <p>Edad: {{ publicacion?.mascota?.edad || 'No disponible' }} años</p>
+          <p>Sexo: {{ publicacion?.mascota?.sexo || 'No especificado' }}</p>
+          <p>Personalidad: {{ publicacion?.mascota?.personalidad?.join(', ') || 'Sin especificar' }}</p>
+          <p>Tipo: {{ publicacion?.mascota?.tipo || 'No especificado' }}</p>
+          <p>Estado de salud: {{ publicacion?.mascota?.estadoSalud || 'No disponible' }}</p>
+          <p>Descripción: {{ publicacion?.mascota?.descripcion || 'Sin descripción' }}</p>
+        </ion-label>
+  
+        <div class="botones-container">
+          <ion-button fill="outline" color="primary" (click)="openUpdateModal(publicacion)">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Actualizar
+          </ion-button>
+          <ion-button fill="outline" color="danger" (click)="eliminarPublicacion(publicacion)">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Eliminar
+          </ion-button>
+        </div>
+      </div>
+    </ion-list>
+  
+    <ion-item *ngIf="publicaciones.length === 0">
+      <ion-label>No hay publicaciones disponibles.</ion-label>
     </ion-item>
-  </ion-list>
-</ng-container>
-
+  </ng-container>
+  
+  
   
 
   <!-- Solicitudes de adopción -->
-  <ng-container *ngIf="selectedSegment === 'adoption-requests'">
-    <ion-list *ngIf="solicitudesAdopcion && solicitudesAdopcion.length > 0">
-      <ion-item *ngFor="let solicitud of solicitudesAdopcion">
-        <ion-label>
-          <h2>Mascota: {{ solicitud.nombreMascota || 'Desconocido' }}</h2>
-          <p>Solicitante: {{ solicitud.nombreUsuarioSolicitante || 'Usuario desconocido' }}</p>
-          <p>Fecha: {{ solicitud.fecha?.toDate() | date: 'medium' }}</p>
-          <p>Estado: {{ solicitud.estado || 'Pendiente' }}</p>
-        </ion-label>
+ <ng-container *ngIf="selectedSegment === 'adoption-requests'">
+  <ion-list *ngIf="solicitudesAdopcion && solicitudesAdopcion.length > 0">
+    <div class="solicitud-card" *ngFor="let solicitud of solicitudesAdopcion">
+      <ion-label>
+        <h2>Mascota: {{ solicitud.nombreMascota || 'Desconocido' }}</h2>
+        <p>Solicitante: {{ solicitud.nombreUsuarioSolicitante || 'Usuario desconocido' }}</p>
+        <p>Fecha: {{ solicitud.fecha?.toDate() | date: 'medium' }}</p>
+        <p>Estado: {{ solicitud.estado || 'Pendiente' }}</p>
+      </ion-label>
+
+      <div class="botones-container">
         <ion-button fill="outline" color="success" (click)="aprobarSolicitud(solicitud)">
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
           Aprobar
         </ion-button>
         <ion-button fill="outline" color="danger" (click)="rechazarSolicitud(solicitud)">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
           Rechazar
         </ion-button>
-      </ion-item>
-    </ion-list>
-  </ng-container>
-</ion-content>
+      </div>
+    </div>
+  </ion-list>
+
+  <ion-item *ngIf="solicitudesAdopcion.length === 0">
+    <ion-label>No hay solicitudes de adopción pendientes.</ion-label>
+  </ion-item>
+</ng-container>
+
+  

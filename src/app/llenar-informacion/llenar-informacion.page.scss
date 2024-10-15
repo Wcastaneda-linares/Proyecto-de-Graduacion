@@ -1,77 +1,126 @@
+/* Imagen de fondo */
+.custom-background {
+  --background: url('https://png.pngtree.com/thumb_back/fw800/back_our/20190620/ourmid/pngtree-functional-dog-food-promotion-main-map-image_144794.jpg') no-repeat center center/cover;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh; /* Asegura que ocupe toda la pantalla */
+}
+
+
+/* Botón */
+ion-button {
+  --background: #4caf50;
+  color: white;
+  width: 100%; /* Asegura que ocupe todo el ancho disponible */
+  margin-top: 1.5rem;
+  border-radius: 8px;
+  z-index: 10; /* Asegura que esté por encima de otros elementos */
+  position: relative; /* Garantiza que no sea cubierto */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15); /* Sombra suave para que resalte */
+}
+
+
+/* Contenedor del formulario */
+.form-container {
+  background: rgba(255, 255, 255, 0.85); /* Fondo semitransparente */
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  width: 95%; /* Ancho del 95% del contenedor */
+  max-width: 1200px; 
+  margin: 1rem auto; /* Centrar el formulario */
+  position: relative;
+  z-index: 10; /* Asegura que el formulario esté por encima del fondo */
+  padding-bottom: 95px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1rem; /* Espacio entre los elementos */
+  min-height: 100vh; /* Asegura que el contenedor tenga la altura suficiente */
+  padding-bottom: 95px; 
+}
+
+
+
+/* Ajustes del ion-content para evitar solapamiento */
 ion-content {
-    --background: #f9f9f9; /* Fondo claro para mejorar la visibilidad */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-  }
-  
-  .form-container {
-    background: white;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para el contenedor */
-    max-width: 800px;
-    width: 100%;
-  }
-  
-  ion-item {
-    margin-bottom: 1.5rem; /* Espaciado más amplio entre los elementos */
-    --background: #ffffff; /* Fondo blanco para cada campo */
-    --border-radius: 10px; /* Bordes redondeados */
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.05); /* Sombra suave para los campos */
-  }
-  
-  ion-label {
-    font-size: 1rem; /* Tamaño del texto más grande */
-    font-weight: 600; /* Negrita en las etiquetas */
-    color: #333; /* Color oscuro para mejor legibilidad */
-  }
-  
-  ion-input,
-  ion-select,
-  ion-textarea {
-    padding: 0.75rem; /* Mayor espaciado dentro de los inputs */
-    font-size: 1rem; /* Tamaño del texto dentro de los inputs */
-  }
-  
-  ion-button {
-    --background: #4caf50; /* Botón verde llamativo */
-    color: #ffffff;
-    font-size: 1.2rem; /* Tamaño del texto del botón */
-    font-weight: bold;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1.5rem;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15); /* Sombra del botón */
-    transition: background-color 0.3s ease;
-  }
-  
-  ion-button:hover {
-    --background: #45a049; /* Botón más oscuro al hacer hover */
-  }
-  
-  .upload-container {
-    margin-top: 1rem; /* Espacio entre el área de upload y los demás campos */
-    text-align: center;
-  }
-  
-  .upload-container ion-label {
-    font-size: 1.1rem; /* Texto más grande para la sección de upload */
-    font-weight: bold;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-  
-  .upload-container ion-input {
-    width: 100%; /* Hacemos que el input ocupe el 100% del contenedor */
-  }
-  
-  .form-title {
-    text-align: center;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #4caf50; /* Color verde para el título */
-    margin-bottom: 2rem;
-  }
-  
+  --background: transparent;
+  padding: 1rem;
+  padding-bottom: 80px; /* Espacio suficiente para el pie de página */
+  overflow-y: auto; /* Habilita el scroll vertical */
+}
+
+
+
+/* Items del formulario */
+ion-item {
+  margin-bottom: 1.5rem;
+  --background: #ffffff;
+  --border-radius: 10px;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.05);
+}
+
+
+
+.scrollable-content {
+  overflow-y: auto;
+  max-height: 100%; /* Asegura que el contenido se ajuste */
+  padding-bottom: 56px; /* Espacio para evitar solapamiento con el footer */
+}
+
+
+
+/* Estilo de los labels */
+ion-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Inputs y selects estilizados */
+ion-input,
+ion-select,
+ion-textarea {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 10px;
+}
+
+
+
+/* Divider estilizado */
+ion-item-divider {
+  --background: #e0e0e0;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+/* Textarea más amigable */
+ion-textarea {
+  height: 100px;
+  resize: none;
+}
+
+/* Contenedor del input de carga */
+ion-item input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 0.5rem;
+}
+
+/* Título del formulario */
+.form-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #4caf50;
+  margin-bottom: 2rem;
+}

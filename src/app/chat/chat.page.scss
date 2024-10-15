@@ -1,10 +1,10 @@
-/* Fondo del contenido con imagen */
+/* Fondo del contenido */
 ion-content {
   --background: url('https://png.pngtree.com/thumb_back/fw800/back_our/20190620/ourmid/pngtree-functional-dog-food-promotion-main-map-image_144794.jpg') center/cover no-repeat;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 0 15px;
+  padding: 15px;
+  height: 100vh;
 }
 
 /* Contenedor principal del chat */
@@ -13,74 +13,109 @@ ion-content {
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  overflow: hidden;
+  gap: 15px;
 }
 
 /* Lista de mensajes */
 ion-list {
-  background-color: rgba(255, 255, 255, 0.85); /* Fondo translúcido para mayor legibilidad */
-  padding: 10px;
-  border-radius: 10px;
-  max-height: 70vh;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 15px;
   overflow-y: auto;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); /* Sombra suave para resaltar la lista */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  flex-grow: 1;
+  max-height: 60vh; /* Asegura espacio para los formularios */
 }
 
-/* Estilos para cada mensaje */
+/* Mensaje individual */
 ion-item {
-  --ion-background-color: transparent;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para separar los mensajes */
-  padding: 10px;
+  background-color: #f8f9fa;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Texto del mensaje */
 ion-label h2 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: #212529;
   margin-bottom: 5px;
 }
 
 ion-label p {
-  font-size: 14px;
-  color: #666;
+  font-size: 15px;
+  color: #495057;
+  margin: 5px 0;
 }
 
-/* Caja de entrada y botón enviar */
+/* Respuestas anidadas */
+ion-list ion-list {
+  margin-left: 20px;
+  border-left: 4px solid #58B0F6;
+  padding-left: 15px;
+  background-color: rgba(240, 240, 240, 0.9);
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* Botón de responder */
+ion-button[fill='clear'] {
+  --color: #ffffff;
+  font-weight: bold;
+  margin-top: 5px;
+  font-size: 16px;
+}
+
+/* Formulario de respuesta */
 ion-card {
-  background-color: rgba(255, 255, 255, 0.9); /* Fondo translúcido para la entrada */
+  background-color: rgba(255, 255, 255, 0.95);
   border-radius: 10px;
-  padding: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Sombra suave */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+  margin-bottom: 10px;
+  max-height: 20vh; /* Ajusta para que no ocupe mucho espacio */
+  overflow-y: auto;
 }
 
+/* Input de texto */
 ion-input {
   --placeholder-color: #888;
-  --background: rgba(255, 255, 255, 0.95); /* Fondo blanco sólido para la caja de texto */
-  --color: #000;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  width: 100%;
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 18px;
+  margin-right: 10px;
 }
 
 /* Botón de enviar */
 ion-button {
-  --background: #58B0F6; /* Azul principal */
-  --color: white; /* Texto blanco */
-  --border-radius: 10px;
-  padding: 0 20px;
-  font-weight: bold;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Sombra para darle profundidad */
-  text-transform: uppercase; /* Texto en mayúsculas */
-}
-
-/* Ajuste del botón flotante, si se usa */
-ion-fab-button {
   --background: #58B0F6;
+  --color: white;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
-small {
-  color: #666;
-  font-size: 12px;
+/* Ajustar el contenido del formulario */
+ion-card-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Ajuste del botón de enviar para que no se corte */
+ion-card-content ion-button {
+  flex-shrink: 0;
+}
+
+/* Ajustes de scroll para los formularios */
+.chat-container ion-card {
+  overflow-y: auto;
+  max-height: 15vh;
 }

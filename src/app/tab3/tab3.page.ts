@@ -2,8 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { AuthService } from '../user-service/auth.service';
+import { RegistrarCentroModalPage } from '../registrar-centro-modal/registrar-centro-modal.page';
+import { ActualizarCentroModalComponent } from '../actualizar-centro-modal/actualizar-centro-modal.component';
+
 
 @Component({
   selector: 'app-tab3',
@@ -12,17 +15,24 @@ import { AuthService } from '../user-service/auth.service';
 })
 export class Tab3Page implements OnInit {
   usuario: any;
+  notificaciones: any[] = [];
+  contadorNotificaciones: number = 0;
+  mostrarNotificaciones: boolean = false;
+  centrosAdopcion: any[] = [];
+  mostrarCentrosAdopcion: boolean = false; // Controla la visibilidad de la lista de centros
 
   constructor(
     private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
     private authService: AuthService,
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
     this.obtenerUsuarioActual();
+    this.obtenerCentrosAdopcion();
   }
 
   obtenerUsuarioActual() {
@@ -32,47 +42,64 @@ export class Tab3Page implements OnInit {
           .collection('users')
           .doc(user.uid)
           .get()
-          .subscribe(
-            (doc) => {
-              if (doc.exists) {
-                this.usuario = doc.data();
-                console.log('Información del usuario:', this.usuario);
-                
-                if (this.usuario && this.usuario.name) {
-                  localStorage.setItem('usuario', this.usuario.name);  // Guardamos el nombre en localStorage
-                } else {
-                  console.error('El usuario no tiene un campo "name"');
-                }
-              }
-            },
-            (error) => {
-              console.error('Error al obtener el usuario:', error);
+          .subscribe((doc) => {
+            if (doc.exists) {
+              this.usuario = doc.data();
+              this.notificaciones = this.usuario.notificaciones || [];
+              this.actualizarContador();
             }
-          );
+          });
       }
     });
+  }
+
+  actualizarContador() {
+    this.contadorNotificaciones = this.notificaciones.filter(
+      (notificacion) => !notificacion.leida
+    ).length;
+  }
+
+  toggleNotificaciones() {
+    this.mostrarNotificaciones = !this.mostrarNotificaciones;
+    if (this.mostrarNotificaciones) {
+      this.marcarNotificacionesLeidas();
+    }
+  }
+
+  toggleCentrosAdopcion() {
+    this.mostrarCentrosAdopcion = !this.mostrarCentrosAdopcion;
+  }
+
+  marcarNotificacionesLeidas() {
+    const notificacionesActualizadas = this.notificaciones.map((notificacion) => ({
+      ...notificacion,
+      leida: true,
+    }));
+
+    if (this.usuario?.uid) {
+      this.firestore
+        .collection('users')
+        .doc(this.usuario.uid)
+        .update({ notificaciones: notificacionesActualizadas })
+        .then(() => {
+          this.notificaciones = notificacionesActualizadas;
+          this.actualizarContador();
+        })
+        .catch((error) => {
+          console.error('Error al actualizar las notificaciones:', error);
+        });
+    }
   }
 
   async cambiarContrasena() {
     const alert = await this.alertController.create({
       header: 'Cambiar Contraseña',
       inputs: [
-        {
-          name: 'password',
-          type: 'password',
-          placeholder: 'Nueva Contraseña',
-        },
-        {
-          name: 'confirmPassword',
-          type: 'password',
-          placeholder: 'Confirmar Contraseña',
-        },
+        { name: 'password', type: 'password', placeholder: 'Nueva Contraseña' },
+        { name: 'confirmPassword', type: 'password', placeholder: 'Confirmar Contraseña' },
       ],
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-        },
+        { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Cambiar',
           handler: (data) => {
@@ -80,94 +107,55 @@ export class Tab3Page implements OnInit {
               this.mostrarError('Las contraseñas no coinciden');
             } else {
               this.authService.cambiarContrasena(data.password)
-                .then(() => {
-                  this.mostrarMensajeExito();  // Mostrar un mensaje de éxito
-                })
-                .catch((error) => {
-                  this.mostrarError('Error al cambiar la contraseña: ' + error.message);
-                });
+                .then(() => this.mostrarMensajeExito())
+                .catch((error) => this.mostrarError('Error: ' + error.message));
             }
-          },
-        },
-      ],
-    });
-  
-    await alert.present();
-  }
-  
-  async mostrarMensajeExito() {
-    const alert = await this.alertController.create({
-      header: 'Éxito',
-      message: 'Contraseña cambiada con éxito.',
-      buttons: ['OK'],
-    });
-  
-    await alert.present();
-  }
-  
-  async configurarNotificaciones() {
-    const alert = await this.alertController.create({
-      header: 'Notificaciones',
-      inputs: [
-        {
-          name: 'notificaciones',
-          type: 'checkbox', // Cambiado a checkbox
-          label: 'Activar notificaciones',
-          value: 'notificaciones',
-          checked: true,
-        },
-      ],
-      buttons: [
-        {
-          text: 'Guardar',
-          handler: (data) => {
-            console.log('Configuraciones de notificaciones: ', data);
           },
         },
       ],
     });
 
     await alert.present();
+  }
+
+  async abrirModal() {
+    const modal = await this.modalCtrl.create({
+      component: RegistrarCentroModalPage,
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      this.firestore.collection('centros_adopcion').add(data).then(() => {
+        console.log('Centro registrado exitosamente');
+        this.obtenerCentrosAdopcion(); // Refresca la lista
+      });
+    }
+  }
+
+  obtenerCentrosAdopcion() {
+    this.firestore
+      .collection('centros_adopcion')
+      .valueChanges({ idField: 'id' })
+      .subscribe((centros) => {
+        this.centrosAdopcion = centros;
+      });
   }
 
   async ajustesGenerales() {
     const alert = await this.alertController.create({
       header: 'Ajustes Generales',
       inputs: [
-        {
-          name: 'tema',
-          type: 'radio',
-          label: 'Claro',
-          value: 'light',
-          checked: true,
-        },
-        {
-          name: 'tema',
-          type: 'radio',
-          label: 'Oscuro',
-          value: 'dark',
-        },
+        { name: 'tema', type: 'radio', label: 'Claro', value: 'light', checked: true },
+        { name: 'tema', type: 'radio', label: 'Oscuro', value: 'dark' },
       ],
       buttons: [
-        {
-          text: 'Guardar',
-          handler: (data) => {
-            console.log('Ajustes guardados: ', data);
-          },
-        },
+        { text: 'Guardar', handler: (data) => console.log('Ajustes guardados: ', data) },
       ],
     });
 
     await alert.present();
-  }
-
-  logout() {
-    this.authService.logout().then(() => {
-      localStorage.removeItem('usuario');
-      this.router.navigate(['/login']);
-    }).catch(error => {
-      console.error('Error al cerrar sesión', error);
-    });
   }
 
   async mostrarError(mensaje: string) {
@@ -177,5 +165,52 @@ export class Tab3Page implements OnInit {
       buttons: ['OK'],
     });
     await alert.present();
+  }
+
+  async mostrarMensajeExito() {
+    const alert = await this.alertController.create({
+      header: 'Éxito',
+      message: 'Contraseña cambiada con éxito.',
+      buttons: ['OK'],
+    });
+    await alert.present();
+  }
+
+  async abrirModalActualizar(centro: any) {
+    const modal = await this.modalCtrl.create({
+      component: ActualizarCentroModalComponent,
+      componentProps: {
+        centro: centro, // Pasar los datos del centro al modal
+      },
+    });
+  
+    await modal.present();
+  
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      this.firestore
+        .collection('centros_adopcion')
+        .doc(centro.id)
+        .update(data)
+        .then(() => console.log('Centro actualizado exitosamente'))
+        .catch((error) => console.error('Error al actualizar el centro:', error));
+    }
+  }
+
+  
+
+  eliminarCentro(centro: any) {
+    this.firestore.collection('centros_adopcion').doc(centro.id).delete().then(() => {
+      this.obtenerCentrosAdopcion();
+    });
+  }
+
+  logout() {
+    this.authService.logout().then(() => {
+      localStorage.removeItem('usuario');
+      this.router.navigate(['/login']);
+    }).catch((error) => {
+      console.error('Error al cerrar sesión', error);
+    });
   }
 }

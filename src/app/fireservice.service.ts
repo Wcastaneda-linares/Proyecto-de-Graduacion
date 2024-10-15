@@ -13,9 +13,49 @@ export class FireserviceService {
     public firestore: AngularFirestore
   ) {}
 
-  login(data: any): Promise<any> {
-    return this.auth.signInWithEmailAndPassword(data.email, data.password);
+  async login(data: any): Promise<any> {
+    try {
+      const userCredential = await this.auth.signInWithEmailAndPassword(data.email, data.password);
+      const email = userCredential.user?.email;
+  
+      if (email) {
+        const nombreUsuario = await this.obtenerNombreUsuario(email);
+        localStorage.setItem('usuario', nombreUsuario); // Guardar el nombre en localStorage
+        console.log('Nombre de usuario guardado:', nombreUsuario);
+      }
+  
+      return userCredential;
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      throw error;
+    }
   }
+  
+  
+  async obtenerNombreUsuario(correo: string): Promise<string> {
+    try {
+      const usuarioSnapshot = await this.firestore
+        .collection('users')
+        .ref.where('email', '==', correo)
+        .get();
+  
+      if (!usuarioSnapshot.empty) {
+        const usuarioData = usuarioSnapshot.docs[0].data() as { name: string };
+        console.log('Nombre del usuario encontrado:', usuarioData.name); // Verifica
+        return usuarioData.name || 'Desconocido';
+      } else {
+        console.warn('Usuario no encontrado en Firestore');
+        return 'Usuario Desconocido';
+      }
+    } catch (error) {
+      console.error('Error al obtener el nombre del usuario:', error);
+      return 'Usuario Desconocido';
+    }
+  }
+  
+
+
+  
 
   signUP(data: any): Promise<any> {
     return this.auth.createUserWithEmailAndPassword(data.email, data.password);
@@ -29,27 +69,17 @@ export class FireserviceService {
     return this.firestore.collection('users').doc(data.uid).valueChanges();
   }
 
-  
+  // Método para registrar un Hogar para animales
+registrarCentroAdopcion(data: any): Promise<any> {
+  return this.firestore.collection('centros_adopcion').add(data);
+}
 
-  // Esta es la función que faltaba para obtener el nombre del usuario
-  async obtenerNombreUsuario(correo: string): Promise<string> {
-    try {
-      const usuarioSnapshot = await this.firestore
-        .collection('users')
-        .ref.where('email', '==', correo)
-        .get();
+// Método para obtener los Hogares para animales
+obtenerCentrosAdopcion(): Observable<any[]> {
+  return this.firestore.collection('centros_adopcion').valueChanges({ idField: 'id' });
+}
 
-      if (!usuarioSnapshot.empty) {
-        const usuarioData = usuarioSnapshot.docs[0].data() as { name: string };
-        return usuarioData.name || 'Desconocido';  // Retorna el nombre del usuario o 'Desconocido' si no está definido
-      } else {
-        return 'Usuario Desconocido';
-      }
-    } catch (error) {
-      console.error('Error al obtener el nombre del usuario: ', error);
-      return 'Usuario Desconocido';
-    }
-  }
+
   
   actualizarPublicacion(publicacion: any) {
     return this.firestore.collection('publicaciones').doc(publicacion.id).update({

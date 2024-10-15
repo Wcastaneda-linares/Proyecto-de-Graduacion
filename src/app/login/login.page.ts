@@ -21,14 +21,21 @@ export class LoginPage {
   onSubmit() {
     this.fireService.login({ email: this.email, password: this.password })
       .then((userCredential: any) => {
-        this.navCtrl.navigateForward('/tabs/tab1');
-        this.errorMessage = ''; // Limpia el mensaje de error en caso de éxito
+        const user = userCredential.user;
+  
+        // Guarda el correo o nombre de usuario en localStorage
+        localStorage.setItem('usuario', user.email); // Cambia a 'user.displayName' si tienes un nombre configurado
+  
+        this.navCtrl.navigateForward('/tabs/tab1'); // Redirige después de iniciar sesión
+        this.errorMessage = ''; // Limpia cualquier mensaje de error
       })
       .catch((error: any) => {
-        this.errorMessage = this.formatErrorMessage(error.code); // Usar una función para formatear o traducir el mensaje
+        this.errorMessage = this.formatErrorMessage(error.code); // Manejo de errores
         console.error(error);
       });
   }
+  
+
 
   registro() {
     this.navCtrl.navigateForward('/signup');

@@ -124,3 +124,62 @@ ion-icon {
   background: #fff;
   color: #000;
 }
+
+.notificaciones {
+  margin-top: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+ion-item {
+  --inner-padding-start: 16px;
+  --inner-padding-end: 16px;
+}
+
+ion-label p {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+ion-label small {
+  color: gray;
+}
+
+ion-badge {
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  min-width: 24px;
+  min-height: 24px;
+  text-align: center;
+  line-height: 24px;
+}
+.centro-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.centro-card ion-label {
+  margin-bottom: 10px;
+  text-align: center; /* Alineación a la izquierda para mejor legibilidad */
+}
+
+.botones-container {
+  margin-top: 10px; /* Asegura que los botones estén debajo del contenido */
+  display: flex;
+  gap: 10px; /* Espacio entre los botones */
+  justify-content: space-between;
+}
+
+.botones-container ion-button {
+  flex: 1; /* Hace que ambos botones tengan el mismo tamaño */
+  max-width: 48%; /* Controla el ancho máximo para mantenerlos juntos */
+}
