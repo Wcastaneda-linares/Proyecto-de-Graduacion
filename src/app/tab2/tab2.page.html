@@ -1,12 +1,7 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title size="large">Donación de Animales</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">
-        <ion-icon name="log-out-outline"></ion-icon>
-        Cerrar Sesión
-      </ion-button>
-    </ion-buttons>
+    <ion-title size="large">Mascotas en Adopción</ion-title>
+
   </ion-toolbar>
 </ion-header>
 <ion-content [fullscreen]="true" class="custom-background">
@@ -48,6 +43,10 @@
   <ion-list *ngIf="!publicaciones || publicaciones.length === 0">
     <ion-item>
       <ion-label>No hay animales disponibles para donación en este momento.</ion-label>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-item>
     </ion-item>
   </ion-list>
 </ion-content>

@@ -74,10 +74,6 @@ ion-header {
   color: white;
 }
 
-/* Título */
-ion-title {
-  font-size: 1.4rem;
-}
 
 /* Segmentos */
 ion-segment-button {
@@ -119,4 +115,10 @@ ion-button:hover {
 /* Iconos de los botones */
 ion-icon {
   margin-right: 5px; /* Espacio entre el icono y el texto */
+}
+
+apx-chart {
+  display: block;
+  margin: 0 auto;
+  max-width: 400px;
 }

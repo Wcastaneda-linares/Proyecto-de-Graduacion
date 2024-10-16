@@ -27,6 +27,16 @@ export class Tab1Page {
       });
     }
   }
+
+  ionViewWillEnter() {
+    console.log('Tab1 se ha vuelto activa');
+    this.cargarDatos();
+  }
+
+  cargarDatos() {
+    console.log('Datos recargados en Tab1');
+    // Aquí va la lógica para refrescar los datos en esta tab.
+  }
   
 
 

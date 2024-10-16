@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+
 @Component({
   selector: 'app-user-service',
   templateUrl: './user-service.page.html',
@@ -8,27 +9,23 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 export class UserService implements OnInit {
   constructor(private firestore: AngularFirestore) {}
 
-  ngOnInit() {}
-  getDetails(uid: string): Promise<any> {
-    // Supongamos que en tu colección 'users' tienes documentos con los detalles de cada usuario,
-    // donde el UID del usuario es el ID del documento.
-    return this.firestore
-      .collection('users')
-      .doc(uid)
-      .ref.get()
-      .then((doc) => {
-        if (doc.exists) {
-          // Devuelve los datos del documento (detalles del usuario).
-          return doc.data();
-        } else {
-          // Si el documento no existe, devuelve un objeto vacío o un mensaje de error, según tu necesidad.
-          return {};
-        }
-      })
-      .catch((error) => {
-        console.error('Error al obtener detalles del usuario: ', error);
-        // Devuelve un objeto vacío o un mensaje de error, según tu necesidad.
-        return {};
-      });
+  ngOnInit() {
+    console.log('UserServiceComponent inicializado');
+
+  }
+
+  async getDetails(uid: string): Promise<any> {
+    try {
+      const doc = await this.firestore.collection('users').doc(uid).ref.get();
+      if (doc.exists) {
+        return doc.data(); // Retorna los datos del usuario, incluyendo el rol.
+      } else {
+        console.warn('Usuario no encontrado.');
+        return null; // Maneja el caso en que no se encuentre el usuario.
+      }
+    } catch (error) {
+      console.error('Error al obtener detalles del usuario: ', error);
+      return null;
+    }
   }
 }

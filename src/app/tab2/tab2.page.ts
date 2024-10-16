@@ -99,6 +99,15 @@ export class Tab2Page implements OnInit {
       });
   }
 
+  ionViewWillEnter() {
+    console.log('Tab2 se ha vuelto activa');
+    this.cargarDatos();
+  }
+
+  cargarDatos() {
+    console.log('Datos recargados en Tab2');
+    // Aquí va la lógica para refrescar los datos en esta tab.
+  }
 
   async mostrarToast(message: string) {
     const toast = await this.toastController.create({

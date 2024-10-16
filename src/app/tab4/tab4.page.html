@@ -1,48 +1,49 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Administración de Usuarios</ion-title>
-
+  <ion-toolbar color="primary">
+    <ion-title>Administración</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="presentPopover($event)">
+        <ion-icon slot="icon-only" name="ellipsis-vertical-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
+
 <!-- Asegúrate de agregar la clase custom-background -->
 <ion-content [fullscreen]="true" class="custom-background">
-  <!-- Segmento para navegar entre secciones -->
-  <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
-    <ion-segment-button value="user-management">
-      Gestión de Usuarios
-    </ion-segment-button>
-    <ion-segment-button value="manage-posts">
-      Gestionar Publicaciones
-    </ion-segment-button>
-    <ion-segment-button value="adoption-requests">
-      Solicitudes de Adopción
-    </ion-segment-button>
-  </ion-segment>
-
-  <!-- Gestión de usuarios -->
-  <ng-container *ngIf="selectedSegment === 'user-management'">
-    <ion-list>
-      <div class="usuario-card" *ngFor="let usuario of usuariosPaginados">
-        <ion-label>
-          <h2>{{ usuario.name }}</h2>
-          <p>{{ usuario.email }}</p>
-          <p>Último acceso: {{ usuario.lastSignInTime | date:'short' }}</p>
-        </ion-label>
   
-        <!-- Contenedor de botones -->
-        <div class="botones-container">
-          <ion-button fill="outline" color="danger" (click)="eliminarUsuario(usuario)">
-            <ion-icon name="trash-outline" slot="start"></ion-icon>
-            Eliminar
-          </ion-button>
+    <ng-container *ngIf="selectedSegment === 'user-management'">
+      <ion-list>
+        <div class="usuario-card" *ngFor="let usuario of usuariosPaginados">
+          <ion-label>
+            <h2>{{ usuario.name }}</h2>
+            <p>Email: {{ usuario.email }}</p>
+            <p>Rol actual: {{ usuario.role }}</p>
+          </ion-label>
+  
+          <div class="botones-container">
+            <ion-button fill="outline" color="primary" (click)="mostrarSelectorRol(usuario)">
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+              Cambiar Rol
+            </ion-button>
+
+            <ion-button fill="outline" color="danger" (click)="confirmarEliminacionUsuario(usuario)">
+              <ion-icon name="trash-outline" slot="start"></ion-icon>
+              Eliminar
+            </ion-button>
+            
+          </div>
         </div>
-      </div>
-    </ion-list>
-  </ng-container>
+      </ion-list>
+      <ion-item>
+      </ion-item>
+    </ng-container>
+
+  
   
 
-  <!-- Gestión de publicaciones -->
+
   <ng-container *ngIf="selectedSegment === 'manage-posts'">
     <ion-list *ngIf="publicaciones && publicaciones.length > 0">
       <div class="publicacion-card" *ngFor="let publicacion of publicaciones">
@@ -75,38 +76,100 @@
     <ion-item *ngIf="publicaciones.length === 0">
       <ion-label>No hay publicaciones disponibles.</ion-label>
     </ion-item>
+      <ion-item>
+      </ion-item>
+  </ng-container>
+
+  <ng-container *ngIf="selectedSegment === 'adoption-requests'">
+    <ion-list *ngIf="solicitudesAdopcion && solicitudesAdopcion.length > 0">
+      <div class="solicitud-card" *ngFor="let solicitud of solicitudesAdopcion">
+        <ion-label>
+          <h2>Mascota: {{ solicitud.nombreMascota || 'Desconocido' }}</h2>
+          <p>Solicitante: {{ solicitud.nombreUsuarioSolicitante || 'Usuario desconocido' }}</p>
+          <p>Fecha: {{ solicitud.fecha?.toDate() | date: 'medium' }}</p>
+          <p>Estado: {{ solicitud.estado || 'Pendiente' }}</p>
+        </ion-label>
+
+        <div class="botones-container">
+          <ion-button fill="outline" color="success" (click)="aprobarSolicitud(solicitud)">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            Aprobar
+          </ion-button>
+          <ion-button fill="outline" color="danger" (click)="rechazarSolicitud(solicitud)">
+            <ion-icon name="close-outline" slot="start"></ion-icon>
+            Rechazar
+          </ion-button>
+        </div>
+      </div>
+    </ion-list>
+
+    <ion-item *ngIf="solicitudesAdopcion.length === 0">
+      <ion-label>No hay solicitudes de adopción pendientes.</ion-label>
+    </ion-item>
+
+      <ion-item>
+      </ion-item>
+  
+  </ng-container>
+ 
+
+  <ng-container *ngIf="selectedSegment === 'reports'">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Reportes de la Aplicación</ion-card-title>
+      </ion-card-header>
+  
+      <ion-card-content>
+        <ion-item>
+          <ion-label>Total de Usuarios: {{ totalUsuarios }}</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>Total de Publicaciones: {{ totalPublicaciones }}</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>Solicitudes Aprobadas: {{ totalSolicitudesAprobadas }}</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>Solicitudes Pendientes: {{ totalSolicitudesPendientes }}</ion-label>
+        </ion-item>
+  
+        <ion-button expand="full" (click)="exportarReportePDF()">
+          <ion-icon name="download-outline" slot="start"></ion-icon>
+          Descargar Reporte en PDF
+        </ion-button>
+
+
+        
+  
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Gráfico de Estadísticas</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <apx-chart 
+            [series]="chartOptions.series"
+            [chart]="chartOptions.chart"
+            [labels]="chartOptions.labels"
+            [legend]="chartOptions.legend"
+            [title]="chartOptions.title"
+            [colors]="chartOptions.colors">
+          </apx-chart>
+          
+          </ion-card-content>
+        </ion-card>
+        
+        
+        
+        
+        
+      </ion-card-content>
+    </ion-card>
+
+    <ion-item>
+    </ion-item>
   </ng-container>
   
   
-  
+</ion-content>
 
-  <!-- Solicitudes de adopción -->
- <ng-container *ngIf="selectedSegment === 'adoption-requests'">
-  <ion-list *ngIf="solicitudesAdopcion && solicitudesAdopcion.length > 0">
-    <div class="solicitud-card" *ngFor="let solicitud of solicitudesAdopcion">
-      <ion-label>
-        <h2>Mascota: {{ solicitud.nombreMascota || 'Desconocido' }}</h2>
-        <p>Solicitante: {{ solicitud.nombreUsuarioSolicitante || 'Usuario desconocido' }}</p>
-        <p>Fecha: {{ solicitud.fecha?.toDate() | date: 'medium' }}</p>
-        <p>Estado: {{ solicitud.estado || 'Pendiente' }}</p>
-      </ion-label>
-
-      <div class="botones-container">
-        <ion-button fill="outline" color="success" (click)="aprobarSolicitud(solicitud)">
-          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-          Aprobar
-        </ion-button>
-        <ion-button fill="outline" color="danger" (click)="rechazarSolicitud(solicitud)">
-          <ion-icon name="close-outline" slot="start"></ion-icon>
-          Rechazar
-        </ion-button>
-      </div>
-    </div>
-  </ion-list>
-
-  <ion-item *ngIf="solicitudesAdopcion.length === 0">
-    <ion-label>No hay solicitudes de adopción pendientes.</ion-label>
-  </ion-item>
-</ng-container>
-
-  
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './user-service/auth.guard'; // Asegúrate de que la ruta esté correcta.
+import { AdminRoleGuard } from './guards/admin-role.guard';
 
 const routes: Routes = [
   {
@@ -44,12 +45,14 @@ const routes: Routes = [
     loadChildren: () =>
       import('./chat/chat.module').then((m) => m.ChatPageModule),
   },
+
   {
     path: 'tab4',
-    loadChildren: () =>
-      import('./tab4/tab4.module').then((m) => m.Tab4PageModule),
-    canActivate: [AuthGuard], // Protege la ruta
+    loadChildren: () => import('./tab4/tab4.module').then((m) => m.Tab4PageModule),
+    canActivate: [AuthGuard, AdminRoleGuard], // Protegido por ambos guards
   },
+
+  
   {
     path: 'solicitudes-adopcion',
     loadChildren: () =>

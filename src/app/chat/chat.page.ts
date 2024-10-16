@@ -31,7 +31,15 @@ export class ChatPage implements OnInit, AfterViewInit {
   }
   
   
-  
+  ionViewWillEnter() {
+    console.log('Chat se ha vuelto activa');
+    this.cargarDatos();
+  }
+
+  cargarDatos() {
+    console.log('Datos recargados en Chat');
+    // Aquí va la lógica para refrescar los datos en esta tab.
+  }
   
   
   ngAfterViewInit() {

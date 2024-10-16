@@ -6,7 +6,7 @@ import { AlertController, ModalController } from '@ionic/angular';
 import { AuthService } from '../user-service/auth.service';
 import { RegistrarCentroModalPage } from '../registrar-centro-modal/registrar-centro-modal.page';
 import { ActualizarCentroModalComponent } from '../actualizar-centro-modal/actualizar-centro-modal.component';
-
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-tab3',
@@ -20,6 +20,7 @@ export class Tab3Page implements OnInit {
   mostrarNotificaciones: boolean = false;
   centrosAdopcion: any[] = [];
   mostrarCentrosAdopcion: boolean = false; // Controla la visibilidad de la lista de centros
+  userRole: string | null = null;
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -27,13 +28,21 @@ export class Tab3Page implements OnInit {
     private authService: AuthService,
     private router: Router,
     private alertController: AlertController,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.obtenerUsuarioActual();
     this.obtenerCentrosAdopcion();
+    this.userRole = localStorage.getItem('userRole');
   }
+
+    // Función para verificar si es administrador
+    isAdmin(): boolean {
+      return this.userRole === 'admin';
+    }
+
 
   obtenerUsuarioActual() {
     this.afAuth.authState.subscribe((user) => {
@@ -95,6 +104,7 @@ export class Tab3Page implements OnInit {
     const alert = await this.alertController.create({
       header: 'Cambiar Contraseña',
       inputs: [
+        { name: 'currentPassword', type: 'password', placeholder: 'Contraseña Actual' },
         { name: 'password', type: 'password', placeholder: 'Nueva Contraseña' },
         { name: 'confirmPassword', type: 'password', placeholder: 'Confirmar Contraseña' },
       ],
@@ -106,7 +116,10 @@ export class Tab3Page implements OnInit {
             if (data.password !== data.confirmPassword) {
               this.mostrarError('Las contraseñas no coinciden');
             } else {
-              this.authService.cambiarContrasena(data.password)
+              this.authService.reautenticarUsuario(data.currentPassword) // Reautenticar primero
+                .then(() => {
+                  return this.authService.cambiarContrasena(data.password); // Cambiar la contraseña
+                })
                 .then(() => this.mostrarMensajeExito())
                 .catch((error) => this.mostrarError('Error: ' + error.message));
             }
@@ -114,9 +127,10 @@ export class Tab3Page implements OnInit {
         },
       ],
     });
-
+  
     await alert.present();
   }
+  
 
   async abrirModal() {
     const modal = await this.modalCtrl.create({
@@ -197,20 +211,92 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  ionViewWillEnter() {
+    console.log('Tab3 (Perfil) activada');
+    this.cargarDatos();
+    this.cd.detectChanges(); // Forzar la detección de cambios
+  }
+
+  cargarDatos() {
+    console.log('Datos recargados en Tab3');
+    // Aquí va la lógica para refrescar los datos en esta tab.
+  }
+
+  async eliminarCentro(centro: any) {
+    const alert = await this.alertController.create({
+      header: 'Confirmar Eliminación',
+      message: `¿Estás seguro de que deseas eliminar el centro "${centro.nombre}"?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Eliminación cancelada');
+          },
+        },
+        {
+          text: 'Eliminar',
+          handler: () => {
+            this.procesarEliminacion(centro); // Llamar al método para procesar la eliminación
+          },
+        },
+      ],
+    });
   
-
-  eliminarCentro(centro: any) {
-    this.firestore.collection('centros_adopcion').doc(centro.id).delete().then(() => {
-      this.obtenerCentrosAdopcion();
-    });
+    await alert.present();
+  }
+  
+  procesarEliminacion(centro: any) {
+    this.firestore
+      .collection('centros_adopcion')
+      .doc(centro.id) // Usa el ID del centro para eliminarlo
+      .delete()
+      .then(() => {
+        console.log(`Centro eliminado: ${centro.nombre}`);
+        this.obtenerCentrosAdopcion(); // Refresca la lista de centros
+      })
+      .catch((error) => {
+        console.error('Error al eliminar el centro:', error);
+      });
   }
 
-  logout() {
-    this.authService.logout().then(() => {
-      localStorage.removeItem('usuario');
+  async confirmLogout() {
+    const alert = await this.alertController.create({
+      header: 'Confirmar Cierre de Sesión',
+      message: '¿Estás seguro de que deseas cerrar sesión?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Cerrar Sesión',
+          handler: () => {
+            this.logout(); // Llama al método de logout
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    const farewellAlert = await this.alertController.create({
+      header: '¡Hasta pronto!',
+      message: 'Esperamos verte de nuevo pronto.',
+      buttons: ['OK'],
+    });
+
+    await farewellAlert.present();
+
+    // Redirige al usuario al login después de que se cierre el mensaje
+    farewellAlert.onDidDismiss().then(() => {
       this.router.navigate(['/login']);
-    }).catch((error) => {
-      console.error('Error al cerrar sesión', error);
     });
   }
+  
+  
 }
