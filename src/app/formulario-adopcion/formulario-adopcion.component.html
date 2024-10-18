@@ -60,6 +60,8 @@
     </ion-item>
     
 
-    <ion-button expand="full" type="submit">Enviar Solicitud</ion-button>
+    <ion-button [disabled]="isUploading" (click)="enviarSolicitud()">Enviar Solicitud</ion-button>
+    <ion-progress-bar *ngIf="isUploading" [value]="uploadProgress / 100"></ion-progress-bar>
+
   </form>
 </ion-content>

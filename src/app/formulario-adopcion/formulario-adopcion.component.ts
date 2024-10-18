@@ -16,9 +16,10 @@ export class FormularioAdopcionComponent {
   tieneHijos: string = '';
   motivoAdopcion: string = '';
   identificacionURL: string = '';
-  selectedFile: File | null = null; 
-  selectedFileName: string = ''; 
-
+  selectedFile: File | null = null;
+  selectedFileName: string = '';
+  isUploading: boolean = false; // Indica si la subida está en proceso
+  uploadProgress: number = 0; // Indicador de progreso
 
   constructor(
     private modalCtrl: ModalController, 
@@ -31,8 +32,8 @@ export class FormularioAdopcionComponent {
 
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
+    console.log('Archivo seleccionado:', file); // Verificar archivo seleccionado
     
-    // Validar que el archivo sea una imagen o un PDF
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
     if (!validTypes.includes(file.type)) {
       alert('Por favor selecciona un archivo de imagen (jpg, png, gif) o un documento PDF.');
@@ -41,7 +42,6 @@ export class FormularioAdopcionComponent {
       return;
     }
   
-    // Validar que el archivo no sea mayor a 1 MB
     const maxSizeInMB = 1;
     const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
     if (file.size > maxSizeInBytes) {
@@ -51,23 +51,33 @@ export class FormularioAdopcionComponent {
       return;
     }
   
-    // Si pasa las validaciones, se guarda el archivo y el nombre
     this.selectedFile = file;
-    this.selectedFileName = file.name; // Almacenar el nombre del archivo
+    this.selectedFileName = file.name; // Guardar el nombre del archivo
+    console.log('Archivo validado y guardado:', this.selectedFile);
   }
+  
 
+ 
   enviarSolicitud() {
     if (this.selectedFile) {
       const filePath = `documentos_identificacion/${Date.now()}_${this.selectedFile.name}`;
       const fileRef = this.storage.ref(filePath);
       const uploadTask = this.storage.upload(filePath, this.selectedFile);
-
+  
+      // Monitorear el progreso de la subida
+      uploadTask.percentageChanges().subscribe(progress => {
+        console.log('Progreso de la subida:', progress); // Verificar el progreso de la subida
+      });
+  
       // Subir la imagen y obtener la URL de descarga
       uploadTask.snapshotChanges().pipe(
         finalize(() => {
           fileRef.getDownloadURL().subscribe((url) => {
+            console.log('URL del archivo subido:', url); // Verificar que la URL se obtiene
             this.identificacionURL = url;
             this.enviarSolicitudConImagen(); // Llamar a la función para enviar la solicitud
+          }, error => {
+            console.error('Error al obtener la URL del archivo:', error);
           });
         })
       ).subscribe();
@@ -85,14 +95,17 @@ export class FormularioAdopcionComponent {
         tieneFamilia: this.tieneFamilia,
         tieneHijos: this.tieneHijos,
         motivoAdopcion: this.motivoAdopcion,
-        identificacionURL: this.identificacionURL,
+        identificacionURL: this.identificacionURL,  // La URL del archivo se debe incluir aquí
       };
-
-      this.modalCtrl.dismiss(data);  // Devolver la información completa
+  
+      console.log('Datos enviados a Firestore:', data);  // Verifica que la URL está en los datos
+      this.modalCtrl.dismiss(data);  // Enviar la información completa con la URL
     } else {
       alert('Por favor completa todos los campos');
     }
   }
+  
 
+  
 
 }

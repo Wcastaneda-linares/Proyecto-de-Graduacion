@@ -11,6 +11,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx';
 import { AngularFireAuth } from '@angular/fire/compat/auth'; 
+import { SolicitudesModalComponent } from '../solicitudes-modal/solicitudes-modal.component'; // Importa el modal
 
 import {
   ApexNonAxisChartSeries,
@@ -81,6 +82,7 @@ export class Tab4Page implements OnInit {
 
   ngOnInit() {
     this.obtenerDatos(); // Primero obtenemos los datos
+    this.obtenerPublicacionesConSolicitudes();
   }
   
 
@@ -89,6 +91,17 @@ export class Tab4Page implements OnInit {
       this.cdr.detectChanges(); // Forzar la detección de cambios
     }, 300); // Esperamos 300 ms para mayor seguridad
   }
+
+  async verSolicitud(solicitud: any) {
+    const modal = await this.modalCtrl.create({
+      component: SolicitudesModalComponent,
+      componentProps: {
+        solicitud: solicitud  // Pasamos la solicitud completa al modal
+      }
+    });
+    return await modal.present();
+  }
+  
 
   async obtenerDatos() {
     await Promise.all([
@@ -217,7 +230,22 @@ export class Tab4Page implements OnInit {
       });
     });
   }
-  
+
+
+  // Método para abrir el modal con los datos de la solicitud
+async abrirSolicitudModal(solicitud: any) {
+  const modal = await this.modalCtrl.create({
+    component: SolicitudesModalComponent,
+    componentProps: {
+      solicitud: solicitud // Pasar los datos de la solicitud al modal
+    }
+  });
+
+  return await modal.present();
+}
+
+
+
   
   obtenerPublicaciones() {
     return new Promise<void>((resolve) => {
@@ -247,8 +275,50 @@ export class Tab4Page implements OnInit {
       });
     });
   }
+
+
+// Obtener las publicaciones junto con las solicitudes
+obtenerPublicacionesConSolicitudes() {
+  this.firestore.collection('publicaciones').snapshotChanges().subscribe(snapshots => {
+    this.publicaciones = snapshots.map(snap => {
+      const data = snap.payload.doc.data() as any;
+      const id = snap.payload.doc.id;
+      return {
+        id,
+        imagenURL: data.imagenURL || 'assets/default-avatar.png',
+        mascota: {
+          ...data.mascota,
+          nombre: data.mascota?.nombre || 'Desconocido'
+        },
+        solicitudes: [],  // Inicialmente vacía
+        mostrarSolicitudes: false // Para controlar la visibilidad de las solicitudes
+      };
+    });
+
+    // Por cada publicación, obtener sus solicitudes de adopción
+    this.publicaciones.forEach(publicacion => {
+      this.firestore.collection('solicitudes_adopcion', ref =>
+        ref.where('idMascota', '==', publicacion.id)
+      ).snapshotChanges().subscribe(solicitudesSnap => {
+        publicacion.solicitudes = solicitudesSnap.map(snap => {
+          const solicitudData = snap.payload.doc.data() as any;
+          return {
+            id: snap.payload.doc.id,
+            ...solicitudData,
+            documentoURL: solicitudData.documentoURL || null // Asegurarse de que el documentoURL esté presente
+          };
+        });
+      });
+    });
+  });
+}
+
   
-  
+    // Toggle para mostrar u ocultar las solicitudes
+    toggleSolicitudes(publicacion: any) {
+      publicacion.mostrarSolicitudes = !publicacion.mostrarSolicitudes;
+    }
+
   
   calcularEstadisticasPublicaciones() {
     const tipos = this.publicaciones.map(p => p.mascota.tipo);
@@ -273,6 +343,7 @@ export class Tab4Page implements OnInit {
             ...data,
             estado: data.estado || 'Pendiente',
             fechaCreacion: data.fechaCreacion?.toDate() || 'Fecha desconocida',
+            identificacionURL: data.identificacionURL || null, // Asegúrate de obtener la URL del documento
             tiempoRespuesta: data.fechaRespuesta 
               ? this.calcularTiempoRespuesta(data.fechaCreacion, data.fechaRespuesta) 
               : 'En espera'
@@ -282,16 +353,17 @@ export class Tab4Page implements OnInit {
         // Contar solicitudes según su estado
         this.totalSolicitudesAprobadas = this.solicitudesAdopcion.filter(s => s.estado === 'Aprobada').length;
         this.totalSolicitudesPendientes = this.solicitudesAdopcion.filter(s => s.estado === 'Pendiente').length;
-        this.totalSolicitudesRechazadas = this.solicitudesAdopcion.filter(s => s.estado === 'Rechazada').length; // Añadimos rechazada
-  
+        this.totalSolicitudesRechazadas = this.solicitudesAdopcion.filter(s => s.estado === 'Rechazada').length; // Añadimos rechazadas
+    
         console.log('Solicitudes Aprobadas:', this.totalSolicitudesAprobadas);
         console.log('Solicitudes Pendientes:', this.totalSolicitudesPendientes);
         console.log('Solicitudes Rechazadas:', this.totalSolicitudesRechazadas); // Verifica que las solicitudes rechazadas se cuenten correctamente
-  
+    
         resolve(); // Asegurar que la promesa se resuelve
       });
     });
   }
+  
   
 
   
@@ -501,21 +573,7 @@ export class Tab4Page implements OnInit {
   }
 
 
-  enviarNotificacion(userId: string, mensaje: string) {
-    const notificacion = {
-      mensaje,
-      fecha: new Date().toISOString(),
-      leida: false,
-    };
 
-    this.firestore.collection('users').doc(userId).update({
-      notificaciones: firebase.firestore.FieldValue.arrayUnion(notificacion),
-    }).then(() => {
-      console.log('Notificación enviada con éxito');
-    }).catch(error => {
-      console.error('Error al enviar notificación: ', error);
-    });
-  }
 
   async openUpdateModal(publicacion: any) {
     const modal = await this.modalCtrl.create({
@@ -633,51 +691,6 @@ export class Tab4Page implements OnInit {
 
 
 
-  async aprobarSolicitud(solicitud: any) {
-    const alert = await this.alertController.create({
-      header: 'Aprobar Solicitud',
-      message: '¿Estás seguro de que deseas aprobar esta solicitud?',
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Aprobar',
-          handler: () => {
-            this.firestore.collection('solicitudes_adopcion').doc(solicitud.id).update({ estado: 'Aprobada' })
-              .then(() => {
-                this.enviarNotificacion(solicitud.idUsuarioSolicitante, 'Tu solicitud de adopción ha sido aprobada.');
-                this.removerSolicitud(solicitud.id);
-              });
-          },
-        },
-      ],
-    });
-    await alert.present();
-  }
-  
-  async rechazarSolicitud(solicitud: any) {
-    const alert = await this.alertController.create({
-      header: 'Rechazar Solicitud',
-      message: '¿Estás seguro de que deseas rechazar esta solicitud?',
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Rechazar',
-          handler: () => {
-            this.firestore.collection('solicitudes_adopcion').doc(solicitud.id).update({ estado: 'Rechazada' })
-              .then(() => {
-                this.enviarNotificacion(solicitud.idUsuarioSolicitante, 'Tu solicitud de adopción ha sido rechazada.');
-                this.removerSolicitud(solicitud.id);
-              });
-          },
-        },
-      ],
-    });
-    await alert.present();
-  }
-  
-  removerSolicitud(id: string) {
-    this.solicitudesAdopcion = this.solicitudesAdopcion.filter(solicitud => solicitud.id !== id);
-  }
   
 
   async cambiarRolUsuario(usuario: any, nuevoRol: string) {

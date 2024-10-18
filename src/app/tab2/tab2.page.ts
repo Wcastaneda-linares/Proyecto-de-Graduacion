@@ -205,37 +205,41 @@ export class Tab2Page implements OnInit {
     }
   }
 
-
-async solicitarAdopcion(publicacion: any) {
-  if (!this.user) {
-    this.mostrarToast('Debe iniciar sesión para solicitar adopción');
-    return;
-  }
-
-  const modal = await this.modalController.create({
-    component: FormularioAdopcionComponent,
-  });
-
-  modal.onDidDismiss().then((dataReturned) => {
-    if (dataReturned.data) {
-      this.firestore.collection('solicitudes_adopcion').add({
-        idMascota: publicacion.id || 'ID desconocido',
-        nombreMascota: publicacion.nombreMascota || 'Nombre desconocido',
-        idUsuarioSolicitante: this.user.uid,
-        nombreUsuarioSolicitante: this.user.email,
-        nombreCompleto: dataReturned.data.nombreCompleto,
-        telefono: dataReturned.data.telefono,
-        direccion: dataReturned.data.direccion,
-        motivoAdopcion: dataReturned.data.motivoAdopcion,
-        fecha: new Date(),
-        estado: 'Pendiente',
-      }).then(() => this.mostrarToast('Solicitud de adopción enviada con éxito'))
-        .catch(error => console.error('Error al enviar solicitud de adopción:', error));
+  async solicitarAdopcion(publicacion: any) {
+    if (!this.user) {
+      this.mostrarToast('Debe iniciar sesión para solicitar adopción');
+      return;
     }
-  });
+  
+    const modal = await this.modalController.create({
+      component: FormularioAdopcionComponent,
+    });
+  
+    modal.onDidDismiss().then((dataReturned) => {
+      if (dataReturned.data) {
+        this.firestore.collection('solicitudes_adopcion').add({
+          idMascota: publicacion.id || 'ID desconocido',
+          nombreMascota: publicacion.nombreMascota || 'Nombre desconocido',
+          idUsuarioSolicitante: this.user.uid,
+          nombreUsuarioSolicitante: this.user.email,
+          nombreCompleto: dataReturned.data.nombreCompleto,
+          telefono: dataReturned.data.telefono,
+          tieneFamilia: dataReturned.data.tieneFamilia,  
+          tieneHijos: dataReturned.data.tieneHijos,  
+          direccion: dataReturned.data.direccion,
+          motivoAdopcion: dataReturned.data.motivoAdopcion,
+          identificacionURL: dataReturned.data.identificacionURL,  // Asegurarse de incluir la URL del archivo
+          fecha: new Date(),
+          estado: 'Pendiente',
+        }).then(() => this.mostrarToast('Solicitud de adopción enviada con éxito'))
+          .catch(error => console.error('Error al enviar solicitud de adopción:', error));
+      }
+    });
+  
+    return await modal.present();
+  }
+  
 
-  return await modal.present();
-}
 
   logout() {
     this.fireService.logout().then(() => console.log('Sesión cerrada'))

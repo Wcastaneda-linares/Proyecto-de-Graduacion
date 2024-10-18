@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Visualizador de Documento</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarModal()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="documentURLSanitizada">
+    <!-- Mostrar la imagen si es una imagen -->
+    <img *ngIf="esImagen()" [src]="documentURLSanitizada" alt="Documento de Identificación" 
+         style="width: 100%; max-height: 90vh; object-fit: contain;" />
+
+    <!-- Mostrar el PDF si es un archivo PDF -->
+    <iframe *ngIf="esPDF()" [src]="documentURLSanitizada" width="100%" height="90vh"></iframe>
+  </div>
+
+  <div *ngIf="!documentURLSanitizada">
+    <p>No se pudo cargar el documento.</p>
+  </div>
+</ion-content>

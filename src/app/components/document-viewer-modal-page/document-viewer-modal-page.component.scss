@@ -1,0 +1,27 @@
+ion-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;  /* Asegura que el contenido no sea recortado */
+    padding: 0;
+  }
+  
+  ion-card {
+    width: auto;
+    height: auto;
+  }
+  
+  ion-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  
+  img, iframe {
+    max-width: 100%;
+    max-height: 90vh;  /* Ocupa hasta el 90% de la ventana para evitar que se corte */
+    width: auto;
+    height: auto;
+  }
+  

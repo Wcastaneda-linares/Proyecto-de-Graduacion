@@ -6,6 +6,7 @@ import { Tab2Page } from './tab2.page';
 import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
 import { FormularioAdopcionComponent } from '../formulario-adopcion/formulario-adopcion.component';
 import { Tab2PageRoutingModule } from './tab2-routing.module';
+import { DocumentViewerModalPageComponent } from '../components/document-viewer-modal-page/document-viewer-modal-page.component';
 
 @NgModule({
   imports: [
@@ -16,6 +17,6 @@ import { Tab2PageRoutingModule } from './tab2-routing.module';
     Tab2PageRoutingModule,
     
   ],
-  declarations: [Tab2Page, FormularioAdopcionComponent]
+  declarations: [Tab2Page, FormularioAdopcionComponent, DocumentViewerModalPageComponent]
 })
 export class Tab2PageModule {}

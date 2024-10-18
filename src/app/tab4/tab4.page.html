@@ -81,36 +81,43 @@
   </ng-container>
 
   <ng-container *ngIf="selectedSegment === 'adoption-requests'">
-    <ion-list *ngIf="solicitudesAdopcion && solicitudesAdopcion.length > 0">
-      <div class="solicitud-card" *ngFor="let solicitud of solicitudesAdopcion">
-        <ion-label>
-          <h2>Mascota: {{ solicitud.nombreMascota || 'Desconocido' }}</h2>
-          <p>Solicitante: {{ solicitud.nombreUsuarioSolicitante || 'Usuario desconocido' }}</p>
-          <p>Fecha: {{ solicitud.fecha?.toDate() | date: 'medium' }}</p>
-          <p>Estado: {{ solicitud.estado || 'Pendiente' }}</p>
-        </ion-label>
-
-        <div class="botones-container">
-          <ion-button fill="outline" color="success" (click)="aprobarSolicitud(solicitud)">
-            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-            Aprobar
-          </ion-button>
-          <ion-button fill="outline" color="danger" (click)="rechazarSolicitud(solicitud)">
-            <ion-icon name="close-outline" slot="start"></ion-icon>
-            Rechazar
-          </ion-button>
-        </div>
-      </div>
-    </ion-list>
-
-    <ion-item *ngIf="solicitudesAdopcion.length === 0">
-      <ion-label>No hay solicitudes de adopción pendientes.</ion-label>
-    </ion-item>
-
-      <ion-item>
-      </ion-item>
+    <ion-list *ngFor="let publicacion of publicaciones">
+      <ion-card>
+        <!-- Imagen y nombre de la mascota -->
+        <img [src]="publicacion.imagenURL" alt="Imagen de la mascota" />
+        <ion-card-header>
+          <ion-card-title>{{ publicacion.mascota?.nombre || 'Nombre desconocido' }}</ion-card-title>
+        </ion-card-header>
   
+        <!-- Botón para ver las solicitudes -->
+        <ion-card-content>
+          <ion-button expand="block" (click)="toggleSolicitudes(publicacion)">
+            Ver solicitudes
+          </ion-button>
+        </ion-card-content>
+  
+        <!-- Sección de solicitudes -->
+        <ion-list *ngIf="publicacion.mostrarSolicitudes">
+          <div *ngFor="let solicitud of publicacion.solicitudes">
+            <ion-item>
+              <ion-label>
+                <h2>Solicitante: {{ solicitud.nombreCompleto || 'Nombre desconocido' }}</h2>
+                <p>Email: {{ solicitud.nombreUsuarioSolicitante || 'Usuario desconocido' }}</p>
+                <p>Fecha: {{ solicitud.fecha?.toDate() | date: 'medium' }}</p>
+                <p>Estado: {{ solicitud.estado || 'Pendiente' }}</p>
+              </ion-label>
+              
+              <ion-button (click)="abrirSolicitudModal(solicitud)">Ver solicitud</ion-button>
+            </ion-item>
+          </div>
+          <div class="botones-container">
+
+          </div>
+        </ion-list>
+      </ion-card>
+    </ion-list>
   </ng-container>
+  
 
   
  
