@@ -1,0 +1,77 @@
+ion-header {
+  background-color: #007bff; /* Color azul profesional para la barra de título */
+  color: white;
+
+  ion-title {
+    font-size: 1.5rem; /* Tamaño más grande para el título */
+    font-weight: bold;
+  }
+
+  ion-button {
+    ion-icon {
+      font-size: 1.5rem; /* Tamaño más grande para el ícono de cerrar */
+      color: white;
+    }
+  }
+}
+
+ion-content {
+  background-color: #f8f9fa; /* Fondo claro profesional */
+  padding: 16px; /* Espaciado alrededor del contenido */
+}
+
+form {
+
+  ion-input, ion-textarea, ion-select {
+    --padding-start: 10px; /* Espacio interior de los inputs */
+    --padding-end: 10px;
+    color: #495057; /* Color de texto más oscuro */
+  }
+
+  ion-button {
+    --background: #007bff; /* Botón principal en azul */
+    --border-radius: 8px;
+    font-weight: 600;
+    margin-top: 20px;
+
+    &:hover {
+      --background: #0056b3; /* Un color más oscuro al pasar el cursor */
+    }
+  }
+
+
+
+
+
+
+  ion-item {
+    display: flex;
+    flex-direction: column; /* Alinea los elementos en una columna */
+    align-items: flex-start; /* Alinea los elementos al inicio de la columna */
+  
+    ion-label {
+      font-weight: 600;
+      color: #343a40;
+      margin-bottom: 10px; /* Espacio entre el label y el input */
+    }
+  
+    input[type="file"] {
+      display: block;
+      margin: 10px 0; /* Espacio entre el input y el nombre del archivo */
+      width: 100%; /* Asegura que el input se ajuste al 100% del contenedor */
+    }
+  
+    .no-file {
+      color: #6c757d; /* Color gris para indicar que no hay archivo seleccionado */
+      font-size: 0.9rem;
+      margin-top: 8px; /* Espacio entre el input y el texto "Sin archivo seleccionado" */
+    }
+  
+    span {
+      font-size: 0.9rem; /* Tamaño más pequeño para el nombre del archivo */
+      margin-top: 8px; /* Espacio entre el input y el nombre del archivo */
+      color: #007bff; /* Color azul para el nombre del archivo seleccionado */
+    }
+  }
+  
+}

@@ -12,6 +12,7 @@ import { ActualizarCentroModalComponent } from './actualizar-centro-modal/actual
 @NgModule({
   declarations: [
     AppComponent,
+    
     // Declaración del componente modal
   ],
   imports: [

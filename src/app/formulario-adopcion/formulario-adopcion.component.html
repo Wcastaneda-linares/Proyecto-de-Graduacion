@@ -1,0 +1,65 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Solicitud de Adopción</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" fill="clear">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content>
+  <form (ngSubmit)="enviarSolicitud()">
+    <ion-item>
+      <ion-label position="floating">Nombre completo</ion-label>
+      <ion-input type="text" [(ngModel)]="nombreCompleto" name="nombreCompleto" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Teléfono de contacto</ion-label>
+      <ion-input type="tel" [(ngModel)]="telefono" name="telefono" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Dirección</ion-label>
+      <ion-input type="text" [(ngModel)]="direccion" name="direccion" required></ion-input>
+    </ion-item>
+
+    <!-- Pregunta si tiene familia -->
+    <ion-item>
+      <ion-label>¿Tiene familia?</ion-label>
+      <ion-select [(ngModel)]="tieneFamilia" name="tieneFamilia" required>
+        <ion-select-option value="si">Sí</ion-select-option>
+        <ion-select-option value="no">No</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Pregunta si tiene hijos -->
+    <ion-item>
+      <ion-label>¿Tiene hijos?</ion-label>
+      <ion-select [(ngModel)]="tieneHijos" name="tieneHijos" required>
+        <ion-select-option value="si">Sí</ion-select-option>
+        <ion-select-option value="no">No</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Motivo de adopción -->
+    <ion-item>
+      <ion-label position="floating">¿Por qué deseas adoptar?</ion-label>
+      <ion-textarea [(ngModel)]="motivoAdopcion" name="motivoAdopcion" required></ion-textarea>
+    </ion-item>
+
+    <!-- Subida de imagen de documento de identificación -->
+    <ion-item>
+      <ion-label>Documento de Identificación</ion-label>
+      <input type="file" (change)="onFileSelected($event)" accept="image/*,application/pdf" required />
+      <span *ngIf="selectedFileName">{{ selectedFileName }}</span>
+      <span *ngIf="!selectedFileName" class="no-file">Sin archivo seleccionado</span>
+    </ion-item>
+    
+
+    <ion-button expand="full" type="submit">Enviar Solicitud</ion-button>
+  </form>
+</ion-content>
