@@ -31,33 +31,39 @@
       <ion-input [(ngModel)]="correoCentro" name="correoCentro" type="email" required></ion-input>
     </ion-item>
 
-    <ion-item-divider>
-      <ion-label>Tipo de Centro</ion-label>
-    </ion-item-divider>
-    <ion-list>
-      <ion-item *ngFor="let tipo of opcionesTipoCentro">
-        <ion-checkbox
-          slot="start"
-          [ngModel]="tipoCentro.includes(tipo)"
-          (ionChange)="toggleCheckbox(tipoCentro, tipo)">
-        </ion-checkbox>
-        <ion-label>{{ tipo }}</ion-label>
-      </ion-item>
-    </ion-list>
-    
-    <ion-item-divider>
-      <ion-label>Servicios Ofrecidos</ion-label>
-    </ion-item-divider>
-    <ion-list>
-      <ion-item *ngFor="let servicio of opcionesServicios">
-        <ion-checkbox
-          slot="start"
-          [ngModel]="servicios.includes(servicio)"
-          (ionChange)="toggleCheckbox(servicios, servicio)">
-        </ion-checkbox>
-        <ion-label>{{ servicio }}</ion-label>
-      </ion-item>
-    </ion-list>
+
+<!-- Tipo de Centro -->
+<ion-item-divider>
+  <ion-label>Tipo de Centro</ion-label>
+</ion-item-divider>
+<ion-list>
+  <ion-item *ngFor="let tipo of opcionesTipoCentro">
+    <ion-checkbox
+      slot="start"
+      [checked]="tipoCentro.includes(tipo)" 
+      (ionChange)="toggleCheckbox(tipoCentro, tipo)">
+    </ion-checkbox>
+    <ion-label>{{ tipo }}</ion-label>
+  </ion-item>
+</ion-list>
+
+<!-- Servicios Ofrecidos -->
+<ion-item-divider>
+  <ion-label>Servicios Ofrecidos</ion-label>
+</ion-item-divider>
+<ion-list>
+  <ion-item *ngFor="let servicio of opcionesServicios">
+    <ion-checkbox
+      slot="start"
+      [checked]="servicios.includes(servicio)" 
+      (ionChange)="toggleCheckbox(servicios, servicio)">
+    </ion-checkbox>
+    <ion-label>{{ servicio }}</ion-label>
+  </ion-item>
+</ion-list>
+
+
+
     
 
     <ion-item>

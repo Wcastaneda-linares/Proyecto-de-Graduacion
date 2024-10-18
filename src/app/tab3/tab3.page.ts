@@ -42,25 +42,29 @@ export class Tab3Page implements OnInit {
     isAdmin(): boolean {
       return this.userRole === 'admin';
     }
+    
 
+    
 
-  obtenerUsuarioActual() {
-    this.afAuth.authState.subscribe((user) => {
-      if (user) {
-        this.firestore
-          .collection('users')
-          .doc(user.uid)
-          .get()
-          .subscribe((doc) => {
-            if (doc.exists) {
-              this.usuario = doc.data();
-              this.notificaciones = this.usuario.notificaciones || [];
-              this.actualizarContador();
-            }
-          });
-      }
-    });
-  }
+    obtenerUsuarioActual() {
+      this.afAuth.authState.subscribe((user) => {
+        if (user) {
+          this.firestore
+            .collection('users')
+            .doc(user.uid)
+            .snapshotChanges() // Escucha cambios y da metadatos
+            .subscribe((snapshot) => {
+              const data = snapshot.payload.data();
+              if (data) {
+                this.usuario = data;
+                this.notificaciones = this.usuario.notificaciones || [];
+                this.actualizarContador();
+              }
+            });
+        }
+      });
+    }
+    
 
   actualizarContador() {
     this.contadorNotificaciones = this.notificaciones.filter(
@@ -84,7 +88,7 @@ export class Tab3Page implements OnInit {
       ...notificacion,
       leida: true,
     }));
-
+  
     if (this.usuario?.uid) {
       this.firestore
         .collection('users')
@@ -92,13 +96,14 @@ export class Tab3Page implements OnInit {
         .update({ notificaciones: notificacionesActualizadas })
         .then(() => {
           this.notificaciones = notificacionesActualizadas;
-          this.actualizarContador();
+          this.actualizarContador(); // Actualiza el contador de inmediato
         })
         .catch((error) => {
           console.error('Error al actualizar las notificaciones:', error);
         });
     }
   }
+  
 
   async cambiarContrasena() {
     const alert = await this.alertController.create({

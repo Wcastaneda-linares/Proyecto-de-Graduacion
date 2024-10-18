@@ -8,11 +8,17 @@ import firebase from 'firebase/compat/app';
   providedIn: 'root',
 })
 export class ChatService {
+  
+  
   private mensajesCollection: AngularFirestoreCollection<any>; // Declaración correcta
+  mensajes: Observable<any[]>; // Observable para escuchar los mensajes
 
   constructor(private afs: AngularFirestore) {
-    // Inicializar la colección de mensajes
-    this.mensajesCollection = this.afs.collection<any>('mensajes');
+        // Inicializa la colección de mensajes dentro del constructor
+        this.mensajesCollection = this.afs.collection<any>('mensajes');
+
+        // Escuchar cambios en tiempo real
+        this.mensajes = this.mensajesCollection.valueChanges({ idField: 'id' });
   }
 
   obtenerMensajes(): Observable<any[]> {
@@ -55,6 +61,11 @@ export class ChatService {
         console.error('Error al enviar mensaje:', error);
       });
   }
+
+    // Función para eliminar un mensaje
+    eliminarMensaje(mensajeId: string) {
+      return this.mensajesCollection.doc(mensajeId).delete();
+    }
   
 
   async enviarNotificacion(userId: string, mensaje: string): Promise<void> {

@@ -11,7 +11,7 @@
         <ion-label>
           <h2>{{ mensaje.usuario }}: {{ mensaje.contenido }}</h2>
           <p>{{ mensaje.timestamp | date: 'medium' }}</p>
-
+      
           <ion-list *ngIf="mensaje.respuestas?.length > 0">
             <ion-item *ngFor="let respuesta of mensaje.respuestas">
               <ion-label>
@@ -20,22 +20,42 @@
               </ion-label>
             </ion-item>
           </ion-list>
-
-          <ion-button fill="clear" (click)="seleccionarMensaje(mensaje)">
+      
+          <div class="botones-container">
+          <ion-button fill="solid" color="primary" (click)="seleccionarMensaje(mensaje)">
             Responder
           </ion-button>
+          
+          <!-- Botón Eliminar con los mismos estilos -->
+          <ion-button fill="solid" color="danger" (click)="eliminarMensaje(mensaje)" *ngIf="esAdmin()">
+            Eliminar
+          </ion-button>
+        </div>
+          
+
         </ion-label>
       </ion-item>
+      
     </ion-list>
 
-    <!-- Formulario de Respuesta -->
-    <ion-card *ngIf="mensajeSeleccionado">
-      <ion-card-header>Respondiendo a: {{ mensajeSeleccionado.contenido }}</ion-card-header>
-      <ion-card-content>
-        <ion-input [(ngModel)]="respuestaMensaje" placeholder="Escribe una respuesta..."></ion-input>
-        <ion-button slot="end" (click)="enviarRespuesta()">Enviar</ion-button>
-      </ion-card-content>
-    </ion-card>
+
+<!-- Formulario de respuesta -->
+<ion-card *ngIf="mensajeSeleccionado">
+  <ion-card-header>
+    Respondiendo a: {{ mensajeSeleccionado.contenido }}
+    <ion-button fill="clear" size="small" (click)="cancelarRespuesta()" class="boton-cerrar">
+      <ion-icon name="close-outline"></ion-icon>
+    </ion-button>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-input [(ngModel)]="respuestaMensaje" placeholder="Escribe un mensaje..."></ion-input>
+    <ion-button slot="end" (click)="enviarRespuesta()">Enviar</ion-button>
+  </ion-card-content>
+</ion-card>
+
+
+
+
 
     <!-- Formulario de Nuevo Mensaje -->
     <ion-card>
@@ -45,8 +65,5 @@
       </ion-card-content>
     </ion-card>
   </div>
-
-    <ion-item>
-    </ion-item>
 
 </ion-content>

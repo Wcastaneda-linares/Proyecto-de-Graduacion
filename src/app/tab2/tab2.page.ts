@@ -34,8 +34,16 @@ export class Tab2Page implements OnInit {
     this.obtenerPublicaciones();
     this.afAuth.authState.subscribe(user => {
       this.user = user;
+      const uid = localStorage.getItem('uid');
+      if (!uid) {
+        console.warn('ID de usuario no proporcionado.');
+      } else {
+        console.log('ID Usuario Creador:', uid);
+      }
     });
   }
+
+  
 
   async obtenerNombreUsuario(idUsuario: string): Promise<string> {
     if (!idUsuario) {

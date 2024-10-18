@@ -2,7 +2,9 @@ import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router, NavigationEnd } from '@angular/router';
-import { filter, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-tabs',

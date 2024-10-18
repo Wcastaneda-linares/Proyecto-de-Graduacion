@@ -24,63 +24,95 @@ export class FireserviceService {
   
 
   async login(credentials: { email: string; password: string }): Promise<any> {
-    const { email, password } = credentials;
-    const userCredential = await this.afAuth.signInWithEmailAndPassword(email, password);
-    const uid = userCredential.user?.uid;
+  const { email, password } = credentials;
+  const userCredential = await this.afAuth.signInWithEmailAndPassword(email, password);
+  const uid = userCredential.user?.uid;
 
-    if (uid) {
-      const userDoc = await this.firestore.collection('users').doc(uid).ref.get();
-      const userData = userDoc.data() as { role: string; name: string };
+  if (uid) {
+    const userDoc = await this.firestore.collection('users').doc(uid).ref.get();
+    const userData = userDoc.data() as { role: string; name: string };
 
-      if (userData) {
-        localStorage.setItem('authToken', 'true');
-        localStorage.setItem('userRole', userData.role);
-        console.log(`Usuario: ${userData.name}, Rol: ${userData.role}`);
-      }
+    if (userData) {
+      localStorage.setItem('authToken', 'true');
+      localStorage.setItem('userRole', userData.role);
+      localStorage.setItem('usuario', uid); // Guarda el UID en el localStorage
+      localStorage.setItem('nombreUsuario', userData.name); 
+      console.log(`Usuario: ${userData.name}, Rol: ${userData.role}`);
     }
-    return userCredential;
   }
+  return userCredential;
+}
 
-  async obtenerNombreUsuario(correo: string): Promise<string> {
-    try {
-      const usuarioSnapshot = await this.firestore
-        .collection('users')
-        .ref.where('email', '==', correo)
-        .get();
   
-      if (!usuarioSnapshot.empty) {
-        const usuarioData = usuarioSnapshot.docs[0].data() as { name: string };
-        console.log('Nombre del usuario encontrado:', usuarioData.name); // Verifica
-        return usuarioData.name || 'Desconocido';
-      } else {
-        console.warn('Usuario no encontrado en Firestore');
-        return 'Usuario Desconocido';
-      }
-    } catch (error) {
-      console.error('Error al obtener el nombre del usuario:', error);
+
+async obtenerNombreUsuario(correo: string): Promise<string> {
+  try {
+    const usuarioSnapshot = await this.firestore
+      .collection('users')
+      .ref.where('email', '==', correo)
+      .get();
+
+    if (!usuarioSnapshot.empty) {
+      const usuarioData = usuarioSnapshot.docs[0].data() as { name: string };
+      return usuarioData.name || 'Desconocido';
+    } else {
       return 'Usuario Desconocido';
     }
+  } catch (error) {
+    console.error('Error al obtener el nombre del usuario:', error);
+    return 'Usuario Desconocido';
   }
+}
+
   
 
-
   signUP(data: any): Promise<any> {
+    console.log('Intentando registrar el usuario con los datos:', data); // Log inicial
+
+    // Verifica si el nombre está presente
+    if (!data.name) {
+      console.warn('El nombre de usuario no fue proporcionado. Usando "Usuario Anónimo".');
+      data.name = 'Usuario Anónimo';  // Establece un valor por defecto si el nombre no está en data
+    }
+
     return this.auth.createUserWithEmailAndPassword(data.email, data.password)
       .then(userCredential => {
         const user = userCredential.user;
+
         if (user) {
+          console.log('Usuario creado exitosamente, UID:', user.uid); // Log de éxito al crear el usuario
+
+          // Estructura de los datos del usuario a guardar en Firestore
           const userData = {
             uid: user.uid,
             email: user.email,
-            name: data.name || 'Usuario Anónimo',
+            name: data.name,  // Usa el nombre capturado del formulario o "Usuario Anónimo"
             role: 'user',  // Rol por defecto
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            birthDate: data.birthDate || null, // Agrega la fecha de nacimiento si está presente
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),  // Fecha de creación en Firestore
           };
-          return this.saveDetails(userData);
+
+          // Guarda los detalles del usuario en Firestore
+          return this.saveDetails(userData)
+            .then(() => {
+              console.log('Detalles del usuario guardados correctamente:', userData); // Log después de guardar los detalles
+              return user;  // Retorna el usuario después de guardar exitosamente
+            })
+            .catch(saveError => {
+              console.error('Error al guardar los detalles del usuario:', saveError);  // Log de error al guardar
+              throw saveError;  // Lanza el error para que se maneje en el catch exterior
+            });
+        } else {
+          return Promise.reject('Error al crear el usuario: No se pudo obtener el UID del usuario.');
         }
-        return Promise.reject('Error al crear el usuario');
+      })
+      .catch(error => {
+        console.error('Error durante la creación del usuario:', error); // Log de error
+        throw error;  // Lanza el error para que se maneje adecuadamente en el proceso
       });
   }
+
+  
   
   async updateUserRole(uid: string, role: string): Promise<void> {
     try {

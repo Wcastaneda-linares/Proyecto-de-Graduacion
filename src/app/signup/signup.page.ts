@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { FireserviceService } from '../fireservice.service';
+import { ToastController } from '@ionic/angular'; 
 
 
 // Validador personalizado para la fecha
@@ -37,7 +38,8 @@ export class SignupPage {
     public fireService: FireserviceService, 
     private navCtrl: NavController,
     private router: Router,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private toastController: ToastController
   ) {
     this.signupForm = this.formBuilder.group({
       name: ['', Validators.required],
@@ -56,45 +58,59 @@ export class SignupPage {
     return pass === confirmPass ? null : { notSame: true };
   }
 
-  onSubmit() {
-    this.firebaseError = null; // Reinicia el mensaje de error
-    if (this.signupForm.valid) {
-      const { email, password, name, birthDate } = this.signupForm.value;
-      const confirmPassword = this.signupForm.get('confirmPassword')?.value;
-  
-      if (password !== confirmPassword) {
-        this.firebaseError = 'Las contraseñas no coinciden.';
-        return;
-      }
-  
-      this.fireService.signUP({ email, password })
-        .then((res) => {
-          if (res && res.user) {
-            const data = { email, name, uid: res.user.uid, birthDate };
-            this.fireService.saveDetails(data)
-              .then(() => {
-                localStorage.setItem('usuario', name); // Guarda el nombre en localStorage
-                this.router.navigate(['/tabs/tab1']);
-              })
-              .catch((error) => {
-                console.error('Error al guardar los detalles del usuario:', error);
-                this.firebaseError = 'Error al guardar tus detalles. Intenta nuevamente.';
-              });
-          }
-        })
-        .catch((error) => {
-          console.error('Error durante el registro:', error);
-          this.firebaseError = this.translateFirebaseError(error.code);
-        });
-    } else {
-      Object.keys(this.signupForm.controls).forEach(key => {
-        const control = this.signupForm.get(key);
-        if (control) control.markAsTouched();
-      });
+  // Método para mostrar un Toast con mensaje de éxito
+async presentToast(message: string) {
+  const toast = await this.toastController.create({
+    message: message,
+    duration: 2000,
+    position: 'top',
+    color: 'success'
+  });
+  toast.present();
+}
+
+onSubmit() {
+  this.firebaseError = null; // Reinicia el mensaje de error
+  if (this.signupForm.valid) {
+    const { email, password, name, birthDate } = this.signupForm.value; // Asegúrate de incluir 'birthDate'
+    const confirmPassword = this.signupForm.get('confirmPassword')?.value;
+
+    if (password !== confirmPassword) {
+      this.firebaseError = 'Las contraseñas no coinciden.';
+      return;
     }
+
+    console.log('Formulario válido, registrando usuario con:', { email, password, name, birthDate }); // Log antes de llamar a signUP
+
+    // Llamar a la función signUP con todos los datos incluyendo birthDate
+    this.fireService.signUP({ email, password, name, birthDate })
+      .then(async (user) => {
+        console.log('Usuario registrado con éxito:', user); // Log después de que el usuario ha sido registrado
+
+        localStorage.setItem('usuario', name);
+        localStorage.setItem('uid', user.uid); // Guardar UID en localStorage
+
+        // Mostrar mensaje de éxito
+        await this.presentToast('Registro exitoso. Iniciando sesión...');
+
+        // Redirigir al usuario a la página principal
+        this.router.navigate(['/tabs/tab1']);
+      })
+      .catch((error) => {
+        console.error('Error durante el registro:', error); // Log si ocurre un error
+        this.firebaseError = this.translateFirebaseError(error.code);
+      });
+  } else {
+    console.log('Formulario inválido, mostrando errores'); // Log si el formulario no es válido
+    Object.keys(this.signupForm.controls).forEach(key => {
+      const control = this.signupForm.get(key);
+      if (control) control.markAsTouched();
+    });
   }
+}
+
   
-  
+
 
   login(){
     

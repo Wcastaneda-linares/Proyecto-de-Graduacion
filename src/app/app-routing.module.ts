@@ -1,7 +1,9 @@
 import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
+import { RouterModule, PreloadAllModules } from '@angular/router';
 import { AuthGuard } from './user-service/auth.guard'; // Asegúrate de que la ruta esté correcta.
 import { AdminRoleGuard } from './guards/admin-role.guard';
+
 
 const routes: Routes = [
   {
@@ -80,9 +82,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),
-  ],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
