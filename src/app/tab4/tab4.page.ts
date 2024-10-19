@@ -576,28 +576,46 @@ obtenerPublicacionesConSolicitudes() {
 
 
   async openUpdateModal(publicacion: any) {
+    // Clona la publicación para evitar problemas de referencia.
+    const publicacionClone = JSON.parse(JSON.stringify(publicacion));
+  
+    // Asegúrate de que los datos del donante estén completos antes de abrir el modal.
+    if (!publicacionClone.donante) {
+      publicacionClone.donante = {
+        nombre: '',
+        direccion: '',
+        numeroContacto: ''
+      };
+    }
+  
     const modal = await this.modalCtrl.create({
       component: UpdatePublicacionModalComponent,
-      componentProps: { publicacion: JSON.parse(JSON.stringify(publicacion)) },
+      componentProps: { publicacion: publicacionClone },
     });
-
+  
     modal.onDidDismiss().then((result) => {
       if (result.data) {
         this.actualizarPublicacion(publicacion.id, result.data);
       }
     });
-
+  
     return await modal.present();
   }
+  
+
 
   async actualizarPublicacion(id: string, data: any) {
     try {
-      await this.firestore.collection('publicaciones').doc(id).update(data);
-      this.obtenerPublicaciones();
+      // Aquí se actualiza solo la información de la mascota en la publicación
+      await this.firestore.collection('publicaciones').doc(id).update({
+        mascota: data.mascota
+      });
+      this.obtenerPublicaciones(); // Refresca la lista de publicaciones
     } catch (error) {
-      console.error('Error al actualizar la publicación:', error);
+      console.error('Error al actualizar la información de la mascota:', error);
     }
   }
+  
 
 
 
