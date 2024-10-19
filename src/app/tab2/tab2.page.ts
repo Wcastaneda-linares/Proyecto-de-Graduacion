@@ -12,6 +12,9 @@ import { ModalController, ActionSheetController, ToastController } from '@ionic/
 import { FireserviceService } from '../fireservice.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { ImageViewerModalPage } from '../image-viewer-modal/image-viewer-modal.page';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
+import { AlertController } from '@ionic/angular'; 
 
 @Component({
   selector: 'app-tab2',
@@ -28,7 +31,8 @@ export class Tab2Page implements OnInit {
     private modalController: ModalController,
     private actionSheetController: ActionSheetController,
     private toastController: ToastController,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private alertController: AlertController // Agrega esta línea
   ) {}
 
   ngOnInit() {
@@ -72,7 +76,6 @@ export class Tab2Page implements OnInit {
     }
   }
 
-
   obtenerPublicaciones() {
     this.firestore
       .collection('publicaciones')
@@ -86,11 +89,44 @@ export class Tab2Page implements OnInit {
   
             const nombreUsuario = await this.obtenerNombreUsuario(publicacion.idUsuarioCreador);
   
+            // Inicializar valores para el centro
+            let nombreCentro = 'Nombre del centro no disponible';
+            let direccionCentro = 'Dirección no disponible';
+            let telefonoCentro = 'Teléfono no disponible';
+  
+            // Si hay un `centroId`, buscar la información del centro
+            if (publicacion.centroId) {
+              console.log('Buscando información para centroId:', publicacion.centroId);
+              try {
+                const centroDocRef = this.firestore.collection('centros_adopcion').doc(publicacion.centroId);
+                const centroSnapshot = await centroDocRef.get().toPromise();
+  
+                if (centroSnapshot && centroSnapshot.exists) {
+                  const datosCentro = centroSnapshot.data() as {
+                    nombre: string;
+                    direccion: string;
+                    telefono: string;
+                  };
+                  console.log('Datos del centro obtenidos:', datosCentro);
+  
+                  // Verificar y asignar datos del centro
+                  nombreCentro = datosCentro?.nombre || 'Nombre del centro no disponible';
+                  direccionCentro = datosCentro?.direccion || 'Dirección no disponible';
+                  telefonoCentro = datosCentro?.telefono || 'Teléfono no disponible';
+                } else {
+                  console.warn(`Centro con ID ${publicacion.centroId} no encontrado.`);
+                }
+              } catch (error) {
+                console.error('Error al obtener datos del centro:', error);
+              }
+            }
+  
             return {
               ...publicacion,
               nombreUsuario,
-              nombreDonante: publicacion.donante?.nombre || 'Donante desconocido', // Acceso correcto al nombre del donante
+              nombreDonante: publicacion.donante?.nombre || 'Donante desconocido',
               nombreMascota: publicacion.mascota?.nombre || 'Nombre desconocido',
+              telefonoDonante: publicacion.donante?.numeroContacto || 'Teléfono no proporcionado',
               razaMascota: publicacion.mascota?.raza || 'Desconocida',
               edadMascota: publicacion.mascota?.edad || 'No disponible',
               tipoMascota: publicacion.mascota?.tipo || 'No especificado',
@@ -99,6 +135,10 @@ export class Tab2Page implements OnInit {
               sexoMascota: publicacion.mascota?.sexo || 'No especificado',
               personalidadMascota: publicacion.mascota?.personalidad?.join(', ') || 'Sin especificar',
               likes: publicacion.likes || [],
+              // Agregar los datos del centro si están disponibles
+              nombreCentro,
+              direccionCentro,
+              telefonoCentro,
             };
           })
         );
@@ -107,7 +147,9 @@ export class Tab2Page implements OnInit {
         console.log('Publicaciones con usuarios:', this.publicaciones);
       });
   }
-
+  
+  
+  
   ionViewWillEnter() {
     console.log('Tab2 se ha vuelto activa');
     this.cargarDatos();
@@ -127,6 +169,9 @@ export class Tab2Page implements OnInit {
     toast.present();
   }
 
+  
+
+  
   async mostrarInformacion(publicacion: any) {
     const userHasLiked = publicacion.likes.includes(this.user?.uid);
     const actionSheet = await this.actionSheetController.create({
@@ -153,16 +198,158 @@ export class Tab2Page implements OnInit {
           handler: () => this.solicitarAdopcion(publicacion),
         },
         {
+          text: 'Aceptar en Centro',
+          icon: 'home',
+          handler: () => this.aceptarAnimalEnCentro(publicacion.id),
+        },
+        {
+          text: 'Cambiar Disponibilidad',
+          icon: 'options',
+          handler: () => this.cambiarDisponibilidad(publicacion),
+        },
+        {
           text: 'Cancelar',
           icon: 'close',
           role: 'cancel',
         },
       ],
     });
-
+  
     await actionSheet.present();
   }
+  
+  async aceptarAnimalEnCentro(idMascota: string) {
+    const centroId = localStorage.getItem('centroId'); // Supongamos que el ID del centro se guarda en el localStorage tras el login del centro
+  
+    if (!centroId) {
+      console.error('ID del centro no encontrado.');
+      return;
+    }
+  
+    try {
+      // Actualizar el centro para agregar el ID de la mascota aceptada
+      await this.firestore.collection('centros_adopcion').doc(centroId).update({
+        animalesAceptados: firebase.firestore.FieldValue.arrayUnion(idMascota),
+      });
+  
+      // Actualizar la mascota para asignarle el centro
+      await this.firestore.collection('publicaciones').doc(idMascota).update({
+        centroIdAdoptante: centroId,
+        estado: 'En refugio',
+      });
+  
+      console.log('Animal aceptado por el centro correctamente.');
+      this.mostrarToast('Animal aceptado en el centro.');
+    } catch (error) {
+      console.error('Error al aceptar el animal en el centro:', error);
+      this.mostrarToast('Error al aceptar el animal en el centro.');
+    }
+  }
 
+  async cambiarDisponibilidad(publicacion: any) {
+  const alert = await this.alertController.create({
+    header: 'Cambiar Disponibilidad',
+    inputs: [
+      {
+        name: 'disponibilidad',
+        type: 'radio',
+        label: 'Disponible',
+        value: 'Disponible',
+        checked: publicacion.estado === 'Disponible',
+      },
+      {
+        name: 'disponibilidad',
+        type: 'radio',
+        label: 'Adoptado',
+        value: 'Adoptado',
+        checked: publicacion.estado === 'Adoptado',
+      },
+      {
+        name: 'disponibilidad',
+        type: 'radio',
+        label: 'En refugio',
+        value: 'En refugio',
+        checked: publicacion.estado === 'En refugio',
+      },
+    ],
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+      },
+      {
+        text: 'Guardar',
+        handler: async (data) => {
+          try {
+            await this.firestore.collection('publicaciones').doc(publicacion.id).update({
+              estado: data,
+            });
+            this.mostrarToast('Disponibilidad actualizada.');
+          } catch (error) {
+            console.error('Error al actualizar la disponibilidad:', error);
+            this.mostrarToast('Error al actualizar la disponibilidad.');
+          }
+        },
+      },
+    ],
+  });
+
+  await alert.present();
+}
+
+  /*
+  async cambiarDisponibilidad(publicacion: any) {
+    const alert = await this.alertController.create({
+      header: 'Cambiar Disponibilidad',
+      inputs: [
+        {
+          name: 'disponibilidad',
+          type: 'radio',
+          label: 'Disponible',
+          value: 'Disponible',
+          checked: publicacion.estado === 'Disponible',
+        },
+        {
+          name: 'disponibilidad',
+          type: 'radio',
+          label: 'Adoptado',
+          value: 'Adoptado',
+          checked: publicacion.estado === 'Adoptado',
+        },
+        {
+          name: 'disponibilidad',
+          type: 'radio',
+          label: 'En refugio',
+          value: 'En refugio',
+          checked: publicacion.estado === 'En refugio',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Guardar',
+          handler: async (data) => {
+            try {
+              await this.firestore.collection('publicaciones').doc(publicacion.id).update({
+                estado: data,
+              });
+              this.mostrarToast('Disponibilidad actualizada.');
+            } catch (error) {
+              console.error('Error al actualizar la disponibilidad:', error);
+              this.mostrarToast('Error al actualizar la disponibilidad.');
+            }
+          },
+        },
+      ],
+    });
+  
+    await alert.present();
+  }
+  */
+  
   async mostrarImagen(imagenURL: string) {
     const modal = await this.modalController.create({
       component: ImageViewerModalPage,

@@ -45,7 +45,11 @@ export class RegistrarCentroModalPage {
       return;
     }
 
+      // Generar un nuevo ID de documento para el centro de adopción
+  const centroId = this.firestore.createId(); // Crear un nuevo ID único
+
     const data = {
+      centroId: centroId, // Almacenar el ID generado
       nombre: this.nombreCentro,
       direccion: this.direccionCentro,
       telefono: this.telefonoCentro,

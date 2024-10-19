@@ -24,6 +24,16 @@ ion-list.usuario {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra más prominente */
 }
 
+ion-list.md {
+  margin: 20px 0;
+  padding: 20px;
+  padding-left: 0px;
+  padding-right: 0px;
+  background-color: rgba(255, 255, 255, 0.9); /* Fondo con un poco de transparencia */
+  border-radius: 15px; /* Bordes más redondeados */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra más prominente */
+}
+
 ion-item {
   --ion-background-color: transparent; /* Sin fondo */
   margin-bottom: 10px;

@@ -23,10 +23,13 @@ export class LlenarInformacionPage {
   descripcionMascota: string = '';
   tipoMascota: string = '';
   estadoSaludMascota: string = '';
-
+  ubicacionMascota: string = 'particular';
   nombreDonante: string = '';
   numeroDonante: string = '';
   direccionDonante: string = '';
+  centrosAdopcion: any[] = []; // Inicializa la lista de centros
+  centroId: string = ''; // ID del centro de adopción seleccionado
+
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -46,6 +49,10 @@ export class LlenarInformacionPage {
     });
   }
 
+  ngOnInit() {
+    this.cargarCentrosAdopcion();
+  }
+
   async cargarDocumento(event: any) {
     const file = event.target.files[0];
     if (file && file.size <= 1 * 1024 * 1024) {
@@ -60,6 +67,35 @@ export class LlenarInformacionPage {
       this.mostrarToast('El archivo debe ser menor a 1 MB');
     }
   }
+
+  async obtenerInformacionCentro(centroId: string) {
+    try {
+      console.log('Buscando información para centroId:', centroId);
+      const centroSnapshot = await this.firestore
+        .collection('centros_adopcion')
+        .doc(centroId) // Utiliza centroId directamente como parámetro
+        .get()
+        .toPromise();
+  
+      if (centroSnapshot && centroSnapshot.exists) {
+        const datosCentro = centroSnapshot.data() as {
+          nombre: string;
+          direccion: string;
+          telefono: string;
+        };
+        console.log('Datos del centro encontrados:', datosCentro);
+        return datosCentro;
+      } else {
+        console.warn(`Centro con ID ${centroId} no encontrado.`);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error al obtener datos del centro:', error);
+      return null;
+    }
+  }
+  
+
   async crearPublicacion() {
     console.log('Tipo de Mascota:', this.tipoMascota);
     console.log('Estado Salud:', this.estadoSaludMascota);
@@ -69,7 +105,41 @@ export class LlenarInformacionPage {
       return;
     }
   
+    let datosCentro = {
+      nombre: 'Nombre del centro no disponible',
+      direccion: 'Dirección no disponible',
+      telefono: 'Teléfono no disponible',
+    };
+  
+    if (this.centroId) {
+      // Buscar datos del centro si se ha seleccionado uno
+      try {
+        console.log('Buscando información para centroId:', this.centroId);
+        const centroSnapshot = await this.firestore
+          .collection('centros_adopcion')
+          .doc(this.centroId) // Usar el ID del centro, no el nombre
+          .get()
+          .toPromise();
+  
+        if (centroSnapshot && centroSnapshot.exists) {
+          datosCentro = centroSnapshot.data() as {
+            nombre: string;
+            direccion: string;
+            telefono: string;
+          };
+        } else {
+          console.warn(`Centro con ID ${this.centroId} no encontrado.`);
+        }
+      } catch (error) {
+        console.error('Error al obtener datos del centro:', error);
+      }
+    }
+  
     const publicacionData = {
+      centroId: this.centroId || null, // Asignar el ID del centro si existe
+      nombreCentro: datosCentro.nombre,
+      direccionCentro: datosCentro.direccion,
+      telefonoCentro: datosCentro.telefono,
       mascota: {
         nombre: this.nombreMascota,
         raza: this.razaMascota,
@@ -100,6 +170,34 @@ export class LlenarInformacionPage {
     }
   }
   
+  
+  
+  
+  cargarCentrosAdopcion() {
+    this.firestore.collection('centros_adopcion').valueChanges({ idField: 'id' }).subscribe((centros: any[]) => {
+      if (centros) {
+        this.centrosAdopcion = centros.map(centro => ({
+          id: centro.id,
+          nombre: centro.nombre,
+          direccion: centro.direccion,
+          telefono: centro.telefono
+        }));
+        console.log('Centros de adopción cargados:', this.centrosAdopcion);
+      } else {
+        console.warn('No se encontraron centros de adopción.');
+      }
+    }, error => {
+      console.error('Error al cargar los centros de adopción:', error);
+    });
+  }
+  
+  onUbicacionChange() {
+    if (this.ubicacionMascota === 'centro') {
+      this.nombreDonante = '';
+      this.numeroDonante = '';
+      this.direccionDonante = '';
+    }
+  }
 
   async mostrarToast(mensaje: string) {
     const toast = await this.toastController.create({

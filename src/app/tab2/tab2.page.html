@@ -17,13 +17,42 @@
             <ion-card-content>
               <h2>{{ publicacion.nombreMascota }}</h2>
               <p><strong>Raza:</strong> {{ publicacion.razaMascota }}</p>
+              <p><strong>Tipo:</strong> {{ publicacion.tipoMascota }}</p>
               <p><strong>Edad:</strong> {{ publicacion.edadMascota }} años</p>
               <p><strong>Sexo:</strong> {{ publicacion.sexoMascota }}</p>
               <p><strong>Personalidad:</strong> {{ publicacion.personalidadMascota }}</p>
-              <p><strong>Tipo:</strong> {{ publicacion.tipoMascota }}</p>
               <p><strong>Estado de salud:</strong> {{ publicacion.estadoSaludMascota }}</p>
-              <p><strong>Descripción:</strong> {{ publicacion.descripcionMascota }}</p>
-              <p><strong>Donado por:</strong> {{ publicacion.nombreDonante }}</p>
+
+
+              <p>
+                <strong>Donante:</strong> 
+                <span *ngIf="publicacion.centroId; else personaParticular">
+                  Centro de Adopción: {{ publicacion.nombreCentro }}
+                </span>
+                <ng-template #personaParticular>
+                  Persona Particular: <strong>{{ publicacion.nombreDonante }}</strong>
+                </ng-template>
+              </p>
+              <p *ngIf="publicacion.centroId; else direccionParticular">
+                <strong>Dirección: </strong> {{ publicacion.direccionCentro }}
+              </p>
+              <p *ngIf="publicacion.centroId; else telefonoParticular">
+                <strong>Teléfono: </strong> {{ publicacion.telefonoCentro }}
+              </p>
+              
+              <!-- Plantillas para persona particular -->
+              <ng-template #direccionParticular>
+                <p><strong>Dirección: </strong> {{ publicacion.donante.direccion }}</p>
+              </ng-template>
+              
+              <ng-template #telefonoParticular>
+                <p><strong>Teléfono: </strong> {{ publicacion.telefonoDonante }}</p>
+              </ng-template>
+              
+              
+              
+              
+              
               <p><strong>Me gusta:</strong> {{ publicacion.likes?.length || 0 }}</p>
             </ion-card-content>
           </ion-col>

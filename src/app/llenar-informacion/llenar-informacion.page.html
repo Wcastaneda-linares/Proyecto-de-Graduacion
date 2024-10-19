@@ -69,23 +69,55 @@
       </ion-item>
 
       <ion-item-divider>
-        <ion-label>Información del Donante</ion-label>
+        <ion-label>Ubicación de la Mascota</ion-label>
       </ion-item-divider>
 
-      <ion-item>
-        <ion-label position="floating">Nombre</ion-label>
-        <ion-input [(ngModel)]="nombreDonante" required></ion-input>
-      </ion-item>
+      <ion-radio-group [(ngModel)]="ubicacionMascota" (ionChange)="onUbicacionChange()">
+        <ion-item>
+          <ion-label>Centro de Adopción</ion-label>
+          <ion-radio slot="start" value="centro"></ion-radio>
+        </ion-item>
+        <ion-item>
+          <ion-label>Donante Particular</ion-label>
+          <ion-radio slot="start" value="particular"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
 
-      <ion-item>
-        <ion-label position="floating">Número de Contacto</ion-label>
-        <ion-input [(ngModel)]="numeroDonante"></ion-input>
-      </ion-item>
+      <!-- Mostrar cuando se selecciona "Centro de Adopción" -->
+      <div *ngIf="ubicacionMascota === 'centro'">
 
-      <ion-item>
-        <ion-label position="floating">Dirección</ion-label>
-        <ion-input [(ngModel)]="direccionDonante"></ion-input>
-      </ion-item>
+          <ion-item>
+            <ion-label>Selecciona un Centro de Adopción</ion-label>
+            <ion-select [(ngModel)]="centroId" placeholder="Selecciona un centro">
+              <ion-select-option *ngFor="let centro of centrosAdopcion" [value]="centro.id">
+                {{ centro.nombre }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+      </div>
+
+      <!-- Mostrar cuando se selecciona "Donante Particular" -->
+      <div *ngIf="ubicacionMascota === 'particular'">
+        <ion-item-divider>
+          <ion-label>Información del Donante</ion-label>
+        </ion-item-divider>
+
+        <ion-item>
+          <ion-label position="floating">Nombre</ion-label>
+          <ion-input [(ngModel)]="nombreDonante" required></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Número de Contacto</ion-label>
+          <ion-input [(ngModel)]="numeroDonante"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Dirección</ion-label>
+          <ion-input [(ngModel)]="direccionDonante"></ion-input>
+        </ion-item>
+      </div>
 
       <ion-item>
         <ion-label>Subir Documento (PDF o Imagen)</ion-label>
@@ -101,8 +133,4 @@
       </ion-button>
     </ion-list>
   </div>
-  <ion-list>
-    <ion-item>
-    </ion-item>
-  </ion-list>
 </ion-content>
