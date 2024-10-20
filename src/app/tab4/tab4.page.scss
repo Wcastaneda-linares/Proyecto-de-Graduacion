@@ -92,6 +92,8 @@ ion-list {
   backdrop-filter: blur(8px); /* Efecto de desenfoque */
   padding: 10px;
   border-radius: 10px; /* Bordes suaves */
+  border-bottom-width: 60px;
+  margin-bottom: 60px;
 }
 
 /* Mejorar espacio en el título */

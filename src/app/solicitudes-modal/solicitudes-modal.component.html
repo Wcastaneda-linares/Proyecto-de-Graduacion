@@ -26,8 +26,10 @@
       </div>
 
       <ion-button *ngIf="solicitud.identificacionURL" (click)="abrirDocumento(solicitud.identificacionURL)" expand="block">
-        Ver Documento de Identificación
+        <ion-icon name="eye-outline" slot="start"></ion-icon>
+        Ver Identificación
       </ion-button>
+      
 
       <div *ngIf="!solicitud.identificacionURL">
         <p class="no-document">No se proporcionó un documento de identificación.</p>
@@ -44,6 +46,7 @@
           Rechazar
         </ion-button>
       </div>
+      
 
       
     </ion-card-content>

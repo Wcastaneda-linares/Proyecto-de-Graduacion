@@ -52,7 +52,9 @@
   
   .footer-toolbar {
     --background: #3b82f6;
+    width: 100%; /* Asegurar que el contenedor ocupe el 100% del ancho */
     padding: 0;
+    
   }
   
   .save-button {
@@ -60,11 +62,21 @@
     color: #fff;
     font-weight: bold;
     border-radius: 0.5rem;
-    margin-top: 15px;
     transition: background-color 0.3s;
+    width: 100%; /* Ocupa el 95% del ancho del contenedor para agregar algo de margen */
+    max-width: 100%; /* Limitar el ancho máximo para evitar que se salga del contenedor */
+    margin: 0; /* Eliminar márgenes */
+    padding: 1rem; /* Relleno cómodo para el botón */
+    display: block; /* Hacer que ocupe todo el ancho disponible */
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-bottom: 5px;
   }
   
   .save-button:hover {
     --background: #1d4ed8;
   }
+
+
   

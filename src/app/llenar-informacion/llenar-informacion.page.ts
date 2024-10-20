@@ -100,9 +100,24 @@ export class LlenarInformacionPage {
     console.log('Tipo de Mascota:', this.tipoMascota);
     console.log('Estado Salud:', this.estadoSaludMascota);
   
+    // Validar los campos obligatorios de tipo de mascota y estado de salud
     if (!this.tipoMascota || !this.estadoSaludMascota) {
       this.mostrarToast('Por favor, seleccione el tipo de mascota y el estado de salud.');
       return;
+    }
+  
+    // Validar información del donante si es un donante particular
+    if (this.ubicacionMascota === 'particular') {
+      if (!this.nombreDonante || !this.numeroDonante || !this.direccionDonante) {
+        this.mostrarToast('Por favor, complete la información del donante.');
+        return;
+      }
+  
+      // Validar documento obligatorio solo para donantes particulares
+      if (!this.documentoURL) {
+        this.mostrarToast('Por favor, sube un documento de identificación.');
+        return;
+      }
     }
   
     let datosCentro = {
@@ -111,8 +126,8 @@ export class LlenarInformacionPage {
       telefono: 'Teléfono no disponible',
     };
   
+    // Obtener datos del centro si se ha seleccionado uno
     if (this.centroId) {
-      // Buscar datos del centro si se ha seleccionado uno
       try {
         console.log('Buscando información para centroId:', this.centroId);
         const centroSnapshot = await this.firestore
@@ -135,6 +150,7 @@ export class LlenarInformacionPage {
       }
     }
   
+    // Construir el objeto de publicación
     const publicacionData = {
       centroId: this.centroId || null, // Asignar el ID del centro si existe
       nombreCentro: datosCentro.nombre,
@@ -151,15 +167,16 @@ export class LlenarInformacionPage {
         estadoSalud: this.estadoSaludMascota,
       },
       donante: {
-        nombre: this.nombreDonante,
-        numeroContacto: this.numeroDonante,
-        direccion: this.direccionDonante,
+        nombre: this.ubicacionMascota === 'particular' ? this.nombreDonante : null,
+        numeroContacto: this.ubicacionMascota === 'particular' ? this.numeroDonante : null,
+        direccion: this.ubicacionMascota === 'particular' ? this.direccionDonante : null,
       },
-      documentoURL: this.documentoURL,
+      documentoURL: this.ubicacionMascota === 'particular' ? this.documentoURL : null,
       imagenURL: this.imagenURL,
       correo: this.usuarioLogueado.email,
     };
   
+    // Intentar crear la publicación en Firestore
     try {
       await this.firestore.collection('publicaciones').add(publicacionData);
       this.mostrarToast('Publicación creada exitosamente');
@@ -169,6 +186,7 @@ export class LlenarInformacionPage {
       this.mostrarToast('Error al crear la publicación');
     }
   }
+  
   
   
   

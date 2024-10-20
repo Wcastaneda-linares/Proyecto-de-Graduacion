@@ -60,4 +60,11 @@
     --min-width: 50vw; /* Ancho mínimo */
   }
   
+  .botones-container {
+    display: flex;
+    justify-content: center; /* Centra los botones horizontalmente */
+    gap: 10px; /* Espacio entre los botones */
+    padding-top: 10px; /* Espaciado opcional arriba */
+  }
+  
   

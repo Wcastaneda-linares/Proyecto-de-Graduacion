@@ -2,6 +2,7 @@ interface Usuario {
   name: string;
   email: string;
   birthDate?: string;
+  role: string;
 }
 
 import { FormularioAdopcionComponent } from '../formulario-adopcion/formulario-adopcion.component';
@@ -24,6 +25,7 @@ import { AlertController } from '@ionic/angular';
 export class Tab2Page implements OnInit {
   publicaciones: any[] = [];
   user: any;
+  userRole: string = '';
 
   constructor(
     private firestore: AngularFirestore,
@@ -37,16 +39,29 @@ export class Tab2Page implements OnInit {
 
   ngOnInit() {
     this.obtenerPublicaciones();
+    
     this.afAuth.authState.subscribe(user => {
-      this.user = user;
-      const uid = localStorage.getItem('uid');
-      if (!uid) {
-        console.warn('ID de usuario no proporcionado.');
-      } else {
+      if (user) {
+        this.user = user;
+        const uid = user.uid; // Obtenemos el UID del usuario autenticado
+  
+        // Guardar el UID en el almacenamiento local si es necesario
+        localStorage.setItem('uid', uid);
         console.log('ID Usuario Creador:', uid);
+  
+        // Obtener el rol del usuario desde Firestore
+        this.firestore.collection('users').doc(uid).get().subscribe((userDoc) => {
+          const userData = userDoc.data() as Usuario; // Hacer el cast a UserData
+          this.userRole = userData?.role || 'user'; // Asignar rol, por defecto 'user' si no hay rol definido
+          console.log(`Rol del usuario cargado: ${this.userRole}`);
+        });
+      } else {
+        console.warn('No se encontró un usuario autenticado.');
       }
     });
   }
+  
+  
 
   
 
@@ -171,14 +186,15 @@ export class Tab2Page implements OnInit {
 
   
 
-  
   async mostrarInformacion(publicacion: any) {
     const userHasLiked = publicacion.likes.includes(this.user?.uid);
+    const isAdopted = publicacion.mascota.estado === 'Adoptado'; // Verificar correctamente el estado
+  
     const actionSheet = await this.actionSheetController.create({
       header: 'Detalles de la publicación',
       buttons: [
         {
-          text: 'Ver imagen',
+          text: 'Ver Imagen Mascota',
           icon: 'image',
           handler: () => this.mostrarImagen(publicacion.imagenURL),
         },
@@ -197,7 +213,12 @@ export class Tab2Page implements OnInit {
           icon: 'paw',
           handler: () => this.solicitarAdopcion(publicacion),
         },
-        
+        // Agregar la opción de cambiar estado solo si el usuario es admin
+        ...(this.userRole === 'admin' ? [{
+          text: `Cambiar estado a ${isAdopted ? 'Disponible' : 'Adoptado'}`,
+          icon: isAdopted ? 'checkmark-circle' : 'close-circle', // Iconos dinámicos basados en el estado
+          handler: () => this.cambiarEstadoMascota(publicacion, isAdopted ? 'Disponible' : 'Adoptado'),
+        }] : []),
         {
           text: 'Cancelar',
           icon: 'close',
@@ -207,6 +228,24 @@ export class Tab2Page implements OnInit {
     });
   
     await actionSheet.present();
+  }
+
+  
+
+  
+  async cambiarEstadoMascota(publicacion: any, nuevoEstado: string) {
+    try {
+      // Actualizar el estado de la mascota en la base de datos (Firestore)
+      await this.firestore.collection('publicaciones').doc(publicacion.id).update({
+        'mascota.estado': nuevoEstado
+      });
+      publicacion.mascota.estado = nuevoEstado; // Actualizar localmente para reflejar el cambio
+  
+      this.mostrarToast(`Estado de la mascota cambiado a: ${nuevoEstado}`);
+    } catch (error) {
+      console.error('Error al cambiar el estado de la mascota:', error);
+      this.mostrarToast('Error al cambiar el estado de la mascota.');
+    }
   }
   
   async aceptarAnimalEnCentro(idMascota: string) {

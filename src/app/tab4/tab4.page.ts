@@ -296,6 +296,7 @@ async abrirSolicitudModal(solicitud: any) {
 
 
 // Obtener las publicaciones junto con las solicitudes
+// Obtener las publicaciones junto con las solicitudes
 obtenerPublicacionesConSolicitudes() {
   this.firestore.collection('publicaciones').snapshotChanges().subscribe(snapshots => {
     this.publicaciones = snapshots.map(snap => {
@@ -309,7 +310,8 @@ obtenerPublicacionesConSolicitudes() {
           nombre: data.mascota?.nombre || 'Desconocido'
         },
         solicitudes: [],  // Inicialmente vacía
-        mostrarSolicitudes: false // Para controlar la visibilidad de las solicitudes
+        mostrarSolicitudes: false, // Para controlar la visibilidad de las solicitudes
+        solicitudesPendientes: 0 // Nueva propiedad para el conteo de pendientes
       };
     });
 
@@ -326,10 +328,14 @@ obtenerPublicacionesConSolicitudes() {
             documentoURL: solicitudData.documentoURL || null // Asegurarse de que el documentoURL esté presente
           };
         });
+
+        // Contar las solicitudes pendientes para esta publicación
+        publicacion.solicitudesPendientes = publicacion.solicitudes.filter((s: any) => s.estado === 'Pendiente').length;
       });
     });
   });
 }
+
 
   
     // Toggle para mostrar u ocultar las solicitudes
