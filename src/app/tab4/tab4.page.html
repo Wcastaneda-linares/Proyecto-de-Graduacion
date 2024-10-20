@@ -139,21 +139,21 @@
   
       <ion-card-content>
         <ion-item>
-          <ion-label>Total de Usuarios: {{ totalUsuarios }}</ion-label>
+          <ion-label>Total de Centros de Adopción: {{ totalCentrosAdopcion }}</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>Total de Mensajes: {{ totalMensajes }}</ion-label>
         </ion-item>
         <ion-item>
           <ion-label>Total de Publicaciones: {{ totalPublicaciones }}</ion-label>
         </ion-item>
         <ion-item>
-          <ion-label>Solicitudes Aprobadas: {{ totalSolicitudesAprobadas }}</ion-label>
+          <ion-label>Total de Solicitudes de Adopción: {{ totalSolicitudesAdopcion }}</ion-label>
         </ion-item>
         <ion-item>
-          <ion-label>Solicitudes Pendientes: {{ totalSolicitudesPendientes }}</ion-label>
+          <ion-label>Total de Usuarios: {{ totalUsuarios }}</ion-label>
         </ion-item>
-        <ion-item>
-          <ion-label>Solicitudes Rechazadas: {{ totalSolicitudesRechazadas }}</ion-label>
-        </ion-item>
-  
+      
         <ion-card *ngIf="chartOptions && chartOptions.series.length > 0">
           <ion-card-header>
             <ion-card-title>Gráfico de Estadísticas</ion-card-title>
@@ -161,17 +161,23 @@
           <ion-card-content>
             <div #chartRef>
               <apx-chart 
-                [series]="chartOptions.series"
-                [chart]="chartOptions.chart"
-                [labels]="chartOptions.labels"
-                [legend]="chartOptions.legend"
-                [title]="chartOptions.title"
-                [colors]="chartOptions.colors">
-              </apx-chart>
+              [series]="chartOptions.series"
+              [chart]="chartOptions.chart"
+              [labels]="chartOptions.labels"
+              [legend]="chartOptions.legend"
+              [title]="chartOptions.title"
+              [xaxis]="chartOptions.xaxis"
+              [plotOptions]="chartOptions.plotOptions"
+              [colors]="chartOptions.colors"
+              [dataLabels]="chartOptions.dataLabels">
+            </apx-chart>
+            
             </div>
           </ion-card-content>
         </ion-card>
       </ion-card-content>
+      
+      
     </ion-card>
   
 <!-- Botón para descargar el PDF -->

@@ -10,6 +10,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx';
+import 'jspdf-autotable';
 import { AngularFireAuth } from '@angular/fire/compat/auth'; 
 import { SolicitudesModalComponent } from '../solicitudes-modal/solicitudes-modal.component'; // Importa el modal
 
@@ -38,23 +39,41 @@ export class Tab4Page implements OnInit {
 
   @ViewChild('chartRef', { static: false }) chartRef!: ElementRef;
   
-
-
   public chartOptions: Partial<ChartOptions> | any = {
     series: [],
     chart: {
-      type: 'donut',
+      type: 'pie', // Puedes cambiar a 'bar', 'donut', etc. según lo necesites
       height: 350,
     },
-    labels: ['Usuarios', 'Publicaciones', 'Aprobadas', 'Pendientes', 'Rechazadas'],
+    labels: [],
     legend: {
       position: 'bottom',
     },
     title: {
       text: 'Estadísticas de la Aplicación',
+      align: 'center'
     },
-    colors: ['#1E88E5', '#66BB6A', '#FFB74D', '#EF5350', '#7E57C2'],
+    colors: ['#1E88E5', '#66BB6A', '#FFA726', '#FF7043', '#AB47BC'],
   };
+  
+  actualizarGrafico() {
+    this.chartOptions = {
+      series: [
+        this.totalUsuarios || 0,
+        this.totalPublicaciones || 0,
+        this.totalCentrosAdopcion || 0,
+        this.totalMensajes || 0,
+        this.totalSolicitudesAdopcion || 0
+      ],
+      chart: {
+        type: 'pie',
+        height: 350
+      },
+      labels: ['Usuarios', 'Publicaciones', 'Centros', 'Mensajes', 'Solicitudes']
+    };
+    
+  }
+  
 
   selectedSegment = 'user-management';
   usuariosPaginados: any[] = [];
@@ -67,6 +86,10 @@ export class Tab4Page implements OnInit {
   totalSolicitudesRechazadas: number = 0; // Declara esta nueva propiedad
   searchQuery: string = ''; // Agrega una variable para almacenar la consulta de búsqueda
   usuariosPaginadosOriginal: any[] = []; // Lista completa de usuarios
+  totalCentrosAdopcion: number = 0;
+  totalMensajes: number = 0;
+  totalSolicitudesAdopcion: number = 0;
+  
 
   
 
@@ -85,6 +108,12 @@ export class Tab4Page implements OnInit {
   ngOnInit() {
     this.obtenerDatos(); // Primero obtenemos los datos
     this.obtenerPublicacionesConSolicitudes();
+    this.obtenerTotales();
+    this.actualizarGrafico();
+    this.configurarGrafico();
+    this.obtenerTotales().then(() => {
+      this.configurarGrafico(); // Configura el gráfico después de obtener los totales
+    });
   }
   
 
@@ -105,107 +134,140 @@ export class Tab4Page implements OnInit {
   }
   
 
+  async obtenerTotales() {
+    try {
+      const centrosSnapshot = await this.firestore.collection('centros_adopcion').get().toPromise();
+      if (centrosSnapshot) {
+        this.totalCentrosAdopcion = centrosSnapshot.size;
+      } else {
+        console.warn("No se encontraron centros de adopción.");
+      }
+  
+      const mensajesSnapshot = await this.firestore.collection('mensajes').get().toPromise();
+      if (mensajesSnapshot) {
+        this.totalMensajes = mensajesSnapshot.size;
+      } else {
+        console.warn("No se encontraron mensajes.");
+      }
+  
+      const publicacionesSnapshot = await this.firestore.collection('publicaciones').get().toPromise();
+      if (publicacionesSnapshot) {
+        this.totalPublicaciones = publicacionesSnapshot.size;
+      } else {
+        console.warn("No se encontraron publicaciones.");
+      }
+  
+      const solicitudesSnapshot = await this.firestore.collection('solicitudes_adopcion').get().toPromise();
+      if (solicitudesSnapshot) {
+        this.totalSolicitudesAdopcion = solicitudesSnapshot.size;
+      } else {
+        console.warn("No se encontraron solicitudes de adopción.");
+      }
+  
+      const usuariosSnapshot = await this.firestore.collection('users').get().toPromise();
+      if (usuariosSnapshot) {
+        this.totalUsuarios = usuariosSnapshot.size;
+      } else {
+        console.warn("No se encontraron usuarios.");
+      }
+  
+      console.log(`Totales: 
+        Centros de Adopción: ${this.totalCentrosAdopcion}, 
+        Mensajes: ${this.totalMensajes}, 
+        Publicaciones: ${this.totalPublicaciones}, 
+        Solicitudes de Adopción: ${this.totalSolicitudesAdopcion}, 
+        Usuarios: ${this.totalUsuarios}`
+      );
+    } catch (error) {
+      console.error("Error al obtener los totales de las colecciones: ", error);
+    }
+  }
+  
+
   async obtenerDatos() {
     await Promise.all([
       this.obtenerUsuarios(),
       this.obtenerPublicaciones(),
+      this.obtenerCentrosAdopcion(),
+      this.obtenerMensajes(),
       this.obtenerSolicitudesAdopcion(),
     ]);
   
     console.log('Usuarios:', this.totalUsuarios);
     console.log('Publicaciones:', this.totalPublicaciones);
-    console.log('Solicitudes Aprobadas:', this.totalSolicitudesAprobadas);
-    console.log('Solicitudes Pendientes:', this.totalSolicitudesPendientes);
-    console.log('Solicitudes Rechazadas:', this.totalSolicitudesRechazadas); // Verificar las rechazadas
+    console.log('Centros de Adopción:', this.totalCentrosAdopcion);
+    console.log('Mensajes:', this.totalMensajes);
+    console.log('Solicitudes de Adopción:', this.totalSolicitudesAdopcion);
   
     // Llama a actualizar el gráfico con los datos cargados
     this.actualizarGrafico();
   }
 
-  actualizarGrafico() {
-    if (
-      this.totalUsuarios !== null &&
-      this.totalPublicaciones !== null &&
-      this.totalSolicitudesAprobadas !== null &&
-      this.totalSolicitudesPendientes !== null &&
-      this.totalSolicitudesRechazadas !== null
-    ) {
-      this.chartOptions.series = [
-        this.totalUsuarios || 0,
-        this.totalPublicaciones || 0,
-        this.totalSolicitudesAprobadas || 0,
-        this.totalSolicitudesPendientes || 0,
-        this.totalSolicitudesRechazadas || 0, // Añadir las rechazadas al gráfico
-      ];
+  async obtenerCentrosAdopcion() {
+    return new Promise<void>((resolve) => {
+      this.firestore.collection('centros_adopcion').snapshotChanges().subscribe(snapshots => {
+        this.totalCentrosAdopcion = snapshots.length;
+        resolve();
+      });
+    });
+  }
   
-      this.chartOptions.labels = ['Usuarios', 'Publicaciones', 'Aprobadas', 'Pendientes', 'Rechazadas']; // Asegúrate de incluir las etiquetas correctas
-  
-      console.log('Datos del gráfico:', this.chartOptions.series);
-      
-      // Forzar la detección de cambios para que el gráfico se actualice
-      this.cdr.detectChanges();
-    } else {
-      console.error('Los datos del gráfico no están listos.');
-    }
+  async obtenerMensajes() {
+    return new Promise<void>((resolve) => {
+      this.firestore.collection('mensajes').snapshotChanges().subscribe(snapshots => {
+        this.totalMensajes = snapshots.length;
+        resolve();
+      });
+    });
   }
 
-
   configurarGrafico() {
+    // Configurar opciones para el gráfico de barras
     this.chartOptions = {
-      series: [
-        {
-          name: 'Estadísticas',
-          data: [
-            this.totalUsuarios || 0,
-            this.totalPublicaciones || 0,
-            this.totalSolicitudesAprobadas || 0,
-            this.totalSolicitudesPendientes || 0,
-            this.totalSolicitudesRechazadas || 0,
-          ],
-        }
-      ],
+      series: [{
+        name: 'Cantidad',
+        data: [
+          this.totalUsuarios || 0,
+          this.totalPublicaciones || 0,
+          this.totalCentrosAdopcion || 0,
+          this.totalMensajes || 0,
+          this.totalSolicitudesAdopcion || 0
+        ]
+      }],
       chart: {
-        type: 'bar',  // Asegúrate de que esté configurado en 'bar'
+        type: 'bar', // Cambiar tipo a 'bar' para un gráfico de barras
         height: 350
       },
       plotOptions: {
         bar: {
-          horizontal: false,  // Cambia a 'true' si prefieres barras horizontales
+          horizontal: false, // Barras verticales
           columnWidth: '55%',
           endingShape: 'rounded'
         }
       },
       dataLabels: {
-        enabled: true
-      },
-      stroke: {
-        show: true,
-        width: 2,
-        colors: ['transparent']
+        enabled: true // Mostrar etiquetas en las barras
       },
       xaxis: {
-        categories: ['Usuarios', 'Publicaciones', 'Aprobadas', 'Pendientes', 'Rechazadas'], // Etiquetas de las barras
+        categories: [
+          'Usuarios', 
+          'Publicaciones', 
+          'Centros de Adopción', 
+          'Mensajes', 
+          'Solicitudes de Adopción'
+        ] // Etiquetas para el eje X
       },
-      fill: {
-        opacity: 1
-      },
-      tooltip: {
-        y: {
-          formatter: function (val: number) {
-            return val + " solicitudes";
-          }
-        }
-      },
+      colors: ['#1976D2', '#66BB6A', '#FFA500', '#EF5350', '#FF6384'],
       title: {
         text: 'Estadísticas de la Aplicación',
         align: 'center'
       },
-      colors: ['#1976D2', '#66BB6A', '#FFA500', '#EF5350', '#FF6384'],  // Colores para cada barra
       legend: {
-        position: 'bottom',
-      },
+        position: 'bottom'
+      }
     };
   }
+  
  
   segmentChanged(event: any) {
     this.selectedSegment = event.detail.value;
@@ -387,6 +449,152 @@ obtenerPublicacionesConSolicitudes() {
       });
     });
   }
+
+
+  exportarReportePDF() {
+    const doc = new jsPDF();
+  
+    // Función para agregar encabezado
+    const agregarEncabezado = () => {
+      doc.setFontSize(16);
+      doc.setTextColor('#1976D2'); // Color azul para el título
+      doc.setFont('helvetica', 'bold');
+      doc.text('APLICACIÓN MÓVIL PARA LA ADOPCIÓN RESPONSABLE', 10, 15);
+      doc.line(10, 20, 200, 20);
+    };
+  
+    agregarEncabezado();
+  
+    // Texto general del reporte
+    doc.setTextColor(0, 0, 0); // Color negro para el texto principal
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Reporte de la Aplicación Móvil', 10, 30);
+  
+    // Función para agregar datos en negrita y colores
+    const agregarDato = (texto: string, valor: any, y: number) => {
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(59, 138, 217); // Negro para el texto principal
+      doc.text(`${texto}:`, 10, y);
+  
+      doc.setTextColor(255, 0, 0); // Rojo para los valores
+      doc.text(`${valor}`, 80, y); // Posicionando los valores a la derecha de los textos
+    };
+  
+    // Agregar los datos con sus respectivos valores
+    let startY = 50;
+    agregarDato('Total de Centros de Adopción', this.totalCentrosAdopcion, startY);
+    agregarDato('Total de Mensajes', this.totalMensajes, startY + 10);
+    agregarDato('Total de Publicaciones', this.totalPublicaciones, startY + 20);
+    agregarDato('Total de Solicitudes de Adopción', this.totalSolicitudesAdopcion, startY + 30);
+    agregarDato('Total de Usuarios', this.totalUsuarios, startY + 40);
+  
+    // Capturamos el gráfico como imagen usando html2canvas
+    const chartElement = this.chartRef.nativeElement;
+    html2canvas(chartElement).then((canvas) => {
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 140; // Ajustar el ancho para ocupar un 80% del ancho de la hoja
+      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Mantener la proporción de la imagen
+      const imgX = (doc.internal.pageSize.width - imgWidth) / 2; // Calcular la posición X para centrar la imagen
+      doc.addImage(imgData, 'PNG', imgX, startY + 60, imgWidth, imgHeight); // Insertar la imagen debajo de los datos, centrada
+      doc.save('reporte-aplicacion.pdf');
+    }).catch((error) => {
+      console.error('Error al generar la imagen del gráfico:', error);
+    });
+  }
+  
+  
+  
+  
+
+
+
+  exportarReporteExcel() {
+    const workbook: XLSX.WorkBook = XLSX.utils.book_new();
+  
+    const data = [
+      ['APLICACIÓN MÓVIL PARA LA ADOPCIÓN RESPONSABLE'],
+      [],
+      ['Reporte de la Aplicación Móvil'],
+      [],
+      ['Total de Centros de Adopción', this.totalCentrosAdopcion],
+      ['Total de Mensajes', this.totalMensajes],
+      ['Total de Publicaciones', this.totalPublicaciones],
+      ['Total de Solicitudes de Adopción', this.totalSolicitudesAdopcion],
+      ['Total de Usuarios', this.totalUsuarios],
+    ];
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reporte');
+    XLSX.writeFile(workbook, 'reporte-aplicacion.xlsx');
+  }
+
+ 
+
+  imprimirReporte() {
+    const printContents = document.getElementById('printable-report');
+    
+    if (printContents) {
+      html2canvas(printContents, {
+        scale: 1.2, // Escala ajustada para reducir el tamaño general
+        useCORS: true
+      }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+  
+        // Crear una ventana emergente para la vista de impresión
+        const popupWin = window.open('', '_blank', 'width=800,height=600');
+  
+        // Escribir el contenido HTML en la ventana emergente
+        popupWin?.document.open();
+        popupWin?.document.write(`
+          <html>
+            <head>
+              <title>Reporte de la Aplicación Móvil</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0; /* Sin márgenes para maximizar el espacio */
+                  padding: 10px; /* Margen ligero para ajustar el contenido */
+                  text-align: center;
+                }
+                h1 {
+                  color: #1976D2;
+                  font-size: 16px; /* Título más pequeño */
+                  margin: 10px 0; /* Margen superior e inferior */
+                }
+                img {
+                  width: 50%; /* Reducir la imagen al 50% del ancho de la página */
+                  height: auto;
+                  margin: 5px auto; /* Centrar y reducir márgenes */
+                }
+              </style>
+            </head>
+            <body>
+              <h1>Reporte de la Aplicación Móvil para la Adopción Responsable</h1>
+              <img src="${imgData}" alt="Gráfico de Estadísticas" />
+              <script>
+                window.onload = function() {
+                  window.print();
+                  window.onafterprint = function() {
+                    window.close();
+                  };
+                };
+              </script>
+            </body>
+          </html>
+        `);
+  
+        popupWin?.document.close();
+      }).catch((error) => {
+        console.error('Error al generar la imagen del gráfico:', error);
+      });
+    } else {
+      console.error('No se encontró el área de impresión.');
+    }
+  }
+  
+  
   
   
 
@@ -397,163 +605,6 @@ obtenerPublicacionesConSolicitudes() {
     return `${dias} días`;
   }
 
-
-
-  exportarReportePDF() {
-    const doc = new jsPDF();
-  
-    // Función para agregar encabezado
-    const agregarEncabezado = () => {
-      // Estilo del título en azul y negrita
-      doc.setFontSize(16);
-      doc.setTextColor('#1976D2');  // Color azul
-      doc.setFont('helvetica', 'bold');  // Texto en negrita
-      doc.text('APLICACIÓN MÓVIL PARA LA ADOPCIÓN RESPONSABLE', 10, 15);  // Título más grande
-      doc.line(10, 20, 200, 20);  // Línea debajo del encabezado
-    };
-  
-    // Agregar encabezado en la primera página
-    agregarEncabezado();
-  
-    // Volvemos al estilo normal para el resto del texto
-    doc.setTextColor(0, 0, 0);  // Cambia a negro
-    doc.setFont('helvetica', 'normal');  // Texto normal
-  
-    // Contenido del reporte
-    doc.setFontSize(14);
-    doc.text('Reporte de la Aplicación Móvil', 10, 30);  // Mover el subtítulo más abajo
-  
-    doc.setFontSize(12);
-    doc.text(`Total de Usuarios: ${this.totalUsuarios}`, 10, 50);
-    doc.text(`Total de Publicaciones: ${this.totalPublicaciones}`, 10, 60);
-    doc.text(`Solicitudes Aprobadas: ${this.totalSolicitudesAprobadas}`, 10, 70);
-    doc.text(`Solicitudes Pendientes: ${this.totalSolicitudesPendientes}`, 10, 80);
-    doc.text(`Solicitudes Rechazadas: ${this.totalSolicitudesRechazadas}`, 10, 90);
-  
-    // Capturamos el gráfico como imagen usando html2canvas
-    const chartElement = this.chartRef.nativeElement;
-    html2canvas(chartElement).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Ajustar el tamaño y posición de la imagen (aumentando la anchura)
-      doc.addImage(imgData, 'PNG', 40, 100, 110, 110);  // Ampliar el gráfico a 190 de ancho y ajustar la posición
-  
-      // Guardar el PDF
-      doc.save('reporte-aplicacion.pdf');
-    }).catch((error) => {
-      console.error('Error al generar la imagen del gráfico:', error);
-    });
-  }
-  
-  exportarReporteExcel() {
-    // Crear un libro de trabajo
-    const workbook: XLSX.WorkBook = XLSX.utils.book_new();
-  
-    // Datos del reporte
-    const data = [
-      ['APLICACIÓN MÓVIL PARA LA ADOPCIÓN RESPONSABLE'],
-      [],  // Fila vacía para espacio
-      ['Reporte de la Aplicación Móvil'],  // Título
-      [],  // Fila vacía para espacio
-      ['Total de Usuarios', this.totalUsuarios],
-      ['Total de Publicaciones', this.totalPublicaciones],
-      ['Solicitudes Aprobadas', this.totalSolicitudesAprobadas],
-      ['Solicitudes Pendientes', this.totalSolicitudesPendientes],
-      ['Solicitudes Rechazadas', this.totalSolicitudesRechazadas]
-    ];
-  
-    // Convertir los datos a una hoja de trabajo
-    const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(data);
-  
-    // Agregar la hoja de trabajo al libro
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reporte');
-  
-    // Exportar el archivo Excel
-    XLSX.writeFile(workbook, 'reporte-aplicacion.xlsx');
-  }
-  
- 
-  imprimirReporte() {
-    const printContents = document.getElementById('printable-report');
-    
-    if (printContents) {
-      html2canvas(printContents).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        
-        // Crear una ventana emergente para la impresión
-        const popupWin = window.open('', '_blank', 'width=800,height=600');
-        
-        popupWin?.document.open();
-        popupWin?.document.write(`
-          <html>
-            <head>
-              <title>Reporte de la Aplicación Móvil</title>
-              <style>
-                body {
-                  font-family: Arial, sans-serif;
-                  margin: 10px;
-                  padding: 10px;
-                  text-align: center;
-                  transform: scale(0.9); /* Reducir ligeramente la escala */
-                  transform-origin: top center; /* Asegurar que esté centrado */
-                }
-                h1 {
-                  color: #1976D2;
-                  font-size: 28px; /* Aumentar tamaño del título */
-                  text-align: center; /* Asegurar que el título esté centrado */
-                }
-                img {
-                  width: 80%; /* Ampliar el tamaño de la imagen */
-                  height: auto;
-                  margin: 0 auto; /* Centrar la imagen */
-                  display: block;
-                }
-                .info-box {
-                  margin: 5px 0;
-                  padding: 5px;
-                  border: 1px solid #ddd;
-                  font-size: 14px; /* Aumentar el tamaño del texto */
-                  text-align: center; /* Asegurar que el contenido esté centrado */
-                }
-                @media print {
-                  body, ion-card, ion-item, .info-box {
-                    page-break-inside: avoid;
-                    margin: 0;
-                    padding: 0;
-                  }
-                  img {
-                    max-width: 100%;
-                    height: auto;
-                  }
-                  /* Ocultar los botones de impresión */
-                  ion-button {
-                    display: none;
-                  }
-                }
-              </style>
-            </head>
-            <body>
-              <h1>APLICACIÓN MÓVIL PARA LA ADOPCIÓN RESPONSABLE</h1>
-              <img src="${imgData}" />
-              <script>
-                window.onload = function() {
-                  window.print();
-                  window.onafterprint = window.close;
-                };
-              </script>
-            </body>
-          </html>
-        `);
-        
-        popupWin?.document.close();
-      }).catch((error) => {
-        console.error('Error al capturar el área de impresión:', error);
-      });
-    } else {
-      console.error('No se encontró el área de impresión.');
-    }
-  }
-  
 
 
   async presentPopover(ev: Event) {

@@ -147,3 +147,26 @@ apx-chart {
   margin: 0 auto; /* Centrar en pantalla */
 }
 
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: auto;
+    transform: none; /* Evita cambios de escala innecesarios */
+  }
+  #printable-report {
+    width: 100%;
+    height: auto;
+
+  }
+  img {
+    width: 100%;
+    height: auto;
+  }
+  ion-button {
+    display: none;
+  }
+}
+
