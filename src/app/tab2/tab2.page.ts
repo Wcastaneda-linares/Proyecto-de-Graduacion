@@ -197,16 +197,7 @@ export class Tab2Page implements OnInit {
           icon: 'paw',
           handler: () => this.solicitarAdopcion(publicacion),
         },
-        {
-          text: 'Aceptar en Centro',
-          icon: 'home',
-          handler: () => this.aceptarAnimalEnCentro(publicacion.id),
-        },
-        {
-          text: 'Cambiar Disponibilidad',
-          icon: 'options',
-          handler: () => this.cambiarDisponibilidad(publicacion),
-        },
+        
         {
           text: 'Cancelar',
           icon: 'close',

@@ -65,6 +65,8 @@ export class Tab4Page implements OnInit {
   totalSolicitudesAprobadas: number = 0;
   totalSolicitudesPendientes: number = 0;
   totalSolicitudesRechazadas: number = 0; // Declara esta nueva propiedad
+  searchQuery: string = ''; // Agrega una variable para almacenar la consulta de búsqueda
+  usuariosPaginadosOriginal: any[] = []; // Lista completa de usuarios
 
   
 
@@ -209,10 +211,10 @@ export class Tab4Page implements OnInit {
     this.selectedSegment = event.detail.value;
   }
 
-  obtenerUsuarios() {
+  async obtenerUsuarios() {
     return new Promise<void>((resolve) => {
       this.firestore.collection('users').snapshotChanges().subscribe(snapshots => {
-        this.usuariosPaginados = snapshots.map(snap => {
+        this.usuariosPaginadosOriginal = snapshots.map(snap => {
           const data = snap.payload.doc.data() as any;
           const id = snap.payload.doc.id;
           return {
@@ -223,7 +225,10 @@ export class Tab4Page implements OnInit {
             createdAt: data.createdAt?.toDate() || 'Fecha desconocida'
           };
         });
-  
+        
+        // Inicializa usuariosPaginados con todos los usuarios cargados inicialmente
+        this.usuariosPaginados = [...this.usuariosPaginadosOriginal];
+
         this.totalUsuarios = this.usuariosPaginados.length;
         console.log('Total de usuarios:', this.totalUsuarios); // Verificar si se está actualizando
         resolve(); // Asegurar que la promesa se resuelve
@@ -231,6 +236,19 @@ export class Tab4Page implements OnInit {
     });
   }
 
+  // Método para filtrar usuarios por nombre
+  filtrarUsuarios() {
+    const query = this.searchQuery.trim().toLowerCase();
+    if (query === '') {
+      // Si no hay texto de búsqueda, muestra todos los usuarios
+      this.usuariosPaginados = [...this.usuariosPaginadosOriginal];
+    } else {
+      // Filtra los usuarios que coincidan con la búsqueda
+      this.usuariosPaginados = this.usuariosPaginadosOriginal.filter(usuario =>
+        usuario.name.toLowerCase().includes(query)
+      );
+    }
+  }
 
   // Método para abrir el modal con los datos de la solicitud
 async abrirSolicitudModal(solicitud: any) {
@@ -659,26 +677,43 @@ obtenerPublicacionesConSolicitudes() {
 
 
   // Confirmar eliminación del usuario
-  async confirmarEliminacionUsuario(usuario: any) {
-    const alert = await this.alertController.create({
-      header: 'Confirmar Eliminación',
-      message: `¿Estás seguro de que deseas eliminar al usuario "${usuario.name}"?`,
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-        },
-        {
-          text: 'Eliminar',
-          handler: () => {
-            this.eliminarUsuario(usuario); // Llamar al método de eliminación
-          },
-        },
-      ],
-    });
+ // Confirmar eliminación del usuario
+async confirmarEliminacionUsuario(usuario: any) {
+  // Verificar si el usuario que se quiere eliminar es el usuario logueado
+  const currentUser = await this.afAuth.currentUser;
 
+  if (currentUser && currentUser.uid === usuario.uid) {
+    // Mostrar una alerta indicando que no se puede eliminar a sí mismo
+    const alert = await this.alertController.create({
+      header: 'Acción no permitida',
+      message: 'No puedes eliminar tu propia cuenta.',
+      buttons: ['OK'],
+    });
     await alert.present();
+    return; // Detener la ejecución
   }
+
+  // Si no es el usuario actual, mostrar la alerta de confirmación de eliminación
+  const alert = await this.alertController.create({
+    header: 'Confirmar Eliminación',
+    message: `¿Estás seguro de que deseas eliminar al usuario "${usuario.name}"?`,
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+      },
+      {
+        text: 'Eliminar',
+        handler: () => {
+          this.eliminarUsuario(usuario); // Llamar al método de eliminación
+        },
+      },
+    ],
+  });
+
+  await alert.present();
+}
+
 
   async eliminarUsuario(usuario: any) {
     console.log('Datos del usuario antes de eliminar:', usuario); // Verifica los datos del usuario

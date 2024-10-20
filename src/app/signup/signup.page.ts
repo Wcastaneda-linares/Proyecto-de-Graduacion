@@ -33,6 +33,7 @@ export class SignupPage {
   email: any;
   password: any;
   name: any;
+  formErrorMessage: string | null = null; // Nueva propiedad para el mensaje de error
 
   constructor(
     public fireService: FireserviceService, 
@@ -58,55 +59,71 @@ export class SignupPage {
     return pass === confirmPass ? null : { notSame: true };
   }
 
-  // Método para mostrar un Toast con mensaje de éxito
-async presentToast(message: string) {
-  const toast = await this.toastController.create({
-    message: message,
-    duration: 2000,
-    position: 'top',
-    color: 'success'
-  });
-  toast.present();
-}
 
 onSubmit() {
   this.firebaseError = null; // Reinicia el mensaje de error
+  let formError = false;
+
+  // Verifica si el formulario es válido y si los campos obligatorios están completos
   if (this.signupForm.valid) {
-    const { email, password, name, birthDate } = this.signupForm.value; // Asegúrate de incluir 'birthDate'
+    const { email, password, name, birthDate } = this.signupForm.value;
     const confirmPassword = this.signupForm.get('confirmPassword')?.value;
 
     if (password !== confirmPassword) {
-      this.firebaseError = 'Las contraseñas no coinciden.';
+      this.presentToast('Las contraseñas no coinciden.', 'danger');
       return;
     }
 
-    console.log('Formulario válido, registrando usuario con:', { email, password, name, birthDate }); // Log antes de llamar a signUP
+    console.log('Formulario válido, registrando usuario con:', { email, password, name, birthDate });
 
-    // Llamar a la función signUP con todos los datos incluyendo birthDate
     this.fireService.signUP({ email, password, name, birthDate })
       .then(async (user) => {
-        console.log('Usuario registrado con éxito:', user); // Log después de que el usuario ha sido registrado
+        console.log('Usuario registrado con éxito:', user);
 
         localStorage.setItem('usuario', name);
-        localStorage.setItem('uid', user.uid); // Guardar UID en localStorage
+        localStorage.setItem('uid', user.uid);
 
         // Mostrar mensaje de éxito
-        await this.presentToast('Registro exitoso. Iniciando sesión...');
+        await this.presentToast('Registro exitoso. Inicia sesión...', 'success');
 
         // Redirigir al usuario a la página principal
         this.router.navigate(['/tabs/tab1']);
       })
       .catch((error) => {
-        console.error('Error durante el registro:', error); // Log si ocurre un error
-        this.firebaseError = this.translateFirebaseError(error.code);
+        console.error('Error durante el registro:', error);
+        this.presentToast(this.translateFirebaseError(error.code), 'danger');
       });
   } else {
-    console.log('Formulario inválido, mostrando errores'); // Log si el formulario no es válido
-    Object.keys(this.signupForm.controls).forEach(key => {
-      const control = this.signupForm.get(key);
-      if (control) control.markAsTouched();
-    });
+    console.log('Formulario inválido, mostrando errores');
+    formError = true;
+    this.markAllAsTouched();
   }
+
+  // Mostrar un mensaje de error general si hay campos sin completar
+  if (formError) {
+    this.presentToast('Por favor, complete todos los campos correctamente.', 'danger');
+  }
+}
+
+// Método para mostrar un Toast con mensaje y color personalizados
+async presentToast(message: string, color: string) {
+  const toast = await this.toastController.create({
+    message: message,
+    duration: 2000,
+    position: 'top',
+    color: color // Color personalizado: success, danger, etc.
+  });
+  toast.present();
+}
+
+
+markAllAsTouched() {
+  Object.keys(this.signupForm.controls).forEach(key => {
+    const control = this.signupForm.get(key);
+    if (control) {
+      control.markAsTouched();
+    }
+  });
 }
 
   

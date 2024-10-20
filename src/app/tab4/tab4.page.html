@@ -3,11 +3,21 @@
     <ion-title>Administración</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="presentPopover($event)">
-        <ion-icon slot="icon-only" name="ellipsis-vertical-outline"></ion-icon>
+        <ion-icon slot="icon-only" name="menu-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+  <div class="searchbar-container">
+    <ion-searchbar
+      [(ngModel)]="searchQuery"
+      (ionInput)="filtrarUsuarios()"
+      class="custom-searchbar"
+      placeholder="Buscar usuario por nombre">
+    </ion-searchbar>
+  </div>
 </ion-header>
+
+
 
 
 <!-- Asegúrate de agregar la clase custom-background -->
