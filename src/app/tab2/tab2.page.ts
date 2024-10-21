@@ -14,7 +14,7 @@ import { FireserviceService } from '../fireservice.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { ImageViewerModalPage } from '../image-viewer-modal/image-viewer-modal.page';
 import firebase from 'firebase/compat/app';
-import 'firebase/compat/firestore';
+import { arrayUnion } from 'firebase/firestore';
 import { AlertController } from '@ionic/angular'; 
 
 @Component({
@@ -26,6 +26,10 @@ export class Tab2Page implements OnInit {
   publicaciones: any[] = [];
   user: any;
   userRole: string = '';
+  tiposDeMascotas: string[] = ['Todos']; // Por defecto, incluir "Todos"
+  filtroTipoMascota: string = 'Todos'; // Por defecto, "Todos"
+
+  
 
   constructor(
     private firestore: AngularFirestore,
@@ -34,35 +38,146 @@ export class Tab2Page implements OnInit {
     private actionSheetController: ActionSheetController,
     private toastController: ToastController,
     private afAuth: AngularFireAuth,
-    private alertController: AlertController // Agrega esta línea
+    private alertController: AlertController, // Agrega esta línea
   ) {}
 
   ngOnInit() {
-    this.obtenerPublicaciones();
+      // Suscribirse al estado de autenticación del usuario
+      this.afAuth.authState.subscribe(user => {
+        if (user) {
+          this.user = user;
+          const uid = user.uid;
     
-    this.afAuth.authState.subscribe(user => {
-      if (user) {
-        this.user = user;
-        const uid = user.uid; // Obtenemos el UID del usuario autenticado
-  
-        // Guardar el UID en el almacenamiento local si es necesario
-        localStorage.setItem('uid', uid);
-        console.log('ID Usuario Creador:', uid);
-  
-        // Obtener el rol del usuario desde Firestore
-        this.firestore.collection('users').doc(uid).get().subscribe((userDoc) => {
-          const userData = userDoc.data() as Usuario; // Hacer el cast a UserData
-          this.userRole = userData?.role || 'user'; // Asignar rol, por defecto 'user' si no hay rol definido
-          console.log(`Rol del usuario cargado: ${this.userRole}`);
-        });
-      } else {
-        console.warn('No se encontró un usuario autenticado.');
-      }
-    });
+          // Guardar el UID en el almacenamiento local si es necesario
+          localStorage.setItem('uid', uid);
+          console.log('ID Usuario Creador:', uid);
+          console.log('Obteniendo correo del solicitante:', this.user.email);
+          // Obtener el rol del usuario desde Firestore
+          this.firestore.collection('users').doc(uid).get().subscribe((userDoc) => {
+            const userData = userDoc.data() as Usuario;
+            this.userRole = userData?.role || 'user'; // Asignar rol, por defecto 'user' si no hay rol definido
+            console.log(`Rol del usuario cargado: ${this.userRole}`);
+    
+            // Ahora que el rol se ha cargado, llamar a obtenerPublicaciones
+            this.obtenerTiposDeMascotas(); // Obtiene los tipos de mascotas
+            this.obtenerPublicaciones(); // Obtiene todas las publicaciones
+          });
+        } else {
+          console.warn('No se encontró un usuario autenticado.');
+        }
+      });
   }
   
   
+  obtenerTiposDeMascotas() {
+    this.firestore.collection('publicaciones').get().subscribe((snapshot) => {
+      if (snapshot.empty) {
+        console.log('No se encontraron publicaciones.');
+        return;
+      }
+  
+      const tiposSet = new Set<string>(); // Usamos un Set para obtener tipos únicos
+  
+      snapshot.forEach((doc) => {
+        const data: any = doc.data();
+        const tipo = data.mascota?.tipo;
+  
+        if (tipo) {
+          tiposSet.add(tipo);
+        } else {
+          console.warn(`Documento sin campo 'tipo' en 'mascota':`, doc.id);
+        }
+      });
+  
+      this.tiposDeMascotas = ['Todos', ...Array.from(tiposSet)];
+    }, (error) => {
+      console.error('Error al obtener tipos de mascotas:', error);
+    });
+  }
 
+  filtrarMascotas() {
+    if (this.filtroTipoMascota === 'Todos') {
+      this.obtenerPublicaciones(); // Muestra todas las mascotas si el filtro es "Todos"
+    } else {
+      // Consulta para obtener las mascotas del tipo seleccionado
+      this.firestore.collection('publicaciones', ref => ref.where('mascota.tipo', '==', this.filtroTipoMascota))
+        .get().subscribe(async (snapshot) => {
+          const publicacionesFiltradas = snapshot.docs.map(doc => doc.data());
+          // Mantener la lógica para cargar información de usuarios y centros
+          const publicacionesConUsuarios = await this.cargarUsuariosYCentros(publicacionesFiltradas);
+          this.publicaciones = publicacionesConUsuarios;
+          console.log('Publicaciones filtradas:', this.publicaciones); // Verifica en la consola
+        }, (error) => {
+          console.error('Error al filtrar mascotas:', error);
+        });
+    }
+  }
+
+  async cargarUsuariosYCentros(publicaciones: any[]): Promise<any[]> {
+    return await Promise.all(
+      publicaciones.map(async (publicacion: any) => {
+        console.log('ID Usuario Creador:', publicacion.idUsuarioCreador);
+    
+        const nombreUsuario = await this.obtenerNombreUsuario(publicacion.idUsuarioCreador);
+    
+        // Inicializar valores para el centro
+        let nombreCentro = 'Nombre del centro no disponible';
+        let direccionCentro = 'Dirección no disponible';
+        let telefonoCentro = 'Teléfono no disponible';
+    
+        // Si hay un `centroId`, buscar la información del centro
+        if (publicacion.centroId) {
+          console.log('Buscando información para centroId:', publicacion.centroId);
+          try {
+            const centroDocRef = this.firestore.collection('centros_adopcion').doc(publicacion.centroId);
+            const centroSnapshot = await centroDocRef.get().toPromise();
+    
+            if (centroSnapshot && centroSnapshot.exists) {
+              const datosCentro = centroSnapshot.data() as {
+                nombre: string;
+                direccion: string;
+                telefono: string;
+              };
+              console.log('Datos del centro obtenidos:', datosCentro);
+    
+              // Verificar y asignar datos del centro
+              nombreCentro = datosCentro?.nombre || 'Nombre del centro no disponible';
+              direccionCentro = datosCentro?.direccion || 'Dirección no disponible';
+              telefonoCentro = datosCentro?.telefono || 'Teléfono no disponible';
+            } else {
+              console.warn(`Centro con ID ${publicacion.centroId} no encontrado.`);
+            }
+          } catch (error) {
+            console.error('Error al obtener datos del centro:', error);
+          }
+        }
+    
+        return {
+          ...publicacion,
+          nombreUsuario,
+          nombreDonante: publicacion.donante?.nombre || 'Donante desconocido',
+          nombreMascota: publicacion.mascota?.nombre || 'Nombre desconocido',
+          telefonoDonante: publicacion.donante?.numeroContacto || 'Teléfono no proporcionado',
+          razaMascota: publicacion.mascota?.raza || 'Desconocida',
+          edadMascota: publicacion.mascota?.edad || 'No disponible',
+          tipoMascota: publicacion.mascota?.tipo || 'No especificado',
+          estadoSaludMascota: publicacion.mascota?.estadoSalud || 'No disponible',
+          descripcionMascota: publicacion.mascota?.descripcion || 'Sin descripción',
+          sexoMascota: publicacion.mascota?.sexo || 'No especificado',
+          personalidadMascota: publicacion.mascota?.personalidad?.join(', ') || 'Sin especificar',
+          likes: publicacion.likes || [],
+          // Agregar los datos del centro si están disponibles
+          nombreCentro,
+          direccionCentro,
+          telefonoCentro,
+        };
+      })
+    );
+  }
+
+  
+  
+  
   
 
   async obtenerNombreUsuario(idUsuario: string): Promise<string> {
@@ -98,8 +213,24 @@ export class Tab2Page implements OnInit {
       .subscribe(async (publicaciones: any[]) => {
         console.log('Publicaciones obtenidas:', publicaciones);
   
+        // Esperar a que se establezca el rol del usuario antes de filtrar
+        if (!this.userRole) {
+          console.warn('Rol del usuario no está definido. Esperando a que se cargue el rol...');
+          return;
+        }
+  
+        // Filtrar las publicaciones según el rol del usuario
+        let publicacionesFiltradas = this.userRole === 'user'
+          ? publicaciones.filter(pub => pub.mascota?.estado === 'Disponible') // Solo mostrar "Disponible" para usuarios comunes
+          : publicaciones;
+  
+        // Aplicar filtro adicional por tipo de mascota si se ha seleccionado uno específico
+        if (this.filtroTipoMascota !== 'Todos') {
+          publicacionesFiltradas = publicacionesFiltradas.filter(pub => pub.mascota?.tipo === this.filtroTipoMascota);
+        }
+  
         const publicacionesConUsuarios = await Promise.all(
-          publicaciones.map(async (publicacion: any) => {
+          publicacionesFiltradas.map(async (publicacion: any) => {
             console.log('ID Usuario Creador:', publicacion.idUsuarioCreador);
   
             const nombreUsuario = await this.obtenerNombreUsuario(publicacion.idUsuarioCreador);
@@ -164,6 +295,44 @@ export class Tab2Page implements OnInit {
   }
   
   
+  toggleMeGusta(publicacion: { id: string; likes: string[] }) {
+    const userId = this.user.uid;
+    const likes = publicacion.likes || [];
+  
+    // Verificar que el ID de la publicación exista antes de intentar actualizarla
+    if (!publicacion.id) {
+      console.error('Error: No se encontró el ID de la publicación.');
+      this.mostrarToast('Error: No se encontró el ID de la publicación.');
+      return;
+    }
+  
+    // Referencia al documento de Firestore
+    const publicacionRef = this.firestore.collection('publicaciones').doc(publicacion.id);
+  
+    publicacionRef.get().subscribe((docSnapshot) => {
+      if (!docSnapshot.exists) {
+        console.error(`Error: No se encontró la publicación con ID ${publicacion.id}.`);
+        this.mostrarToast('Error: La publicación no existe.');
+        return;
+      }
+  
+      if (likes.includes(userId)) {
+        const newLikes = likes.filter(id => id !== userId);
+        publicacionRef.update({ likes: newLikes })
+          .then(() => this.mostrarToast('Has quitado "Me gusta" a la publicación'))
+          .catch(error => console.error('Error al quitar "Me gusta":', error));
+      } else {
+        likes.push(userId);
+        publicacionRef.update({ likes })
+          .then(() => this.mostrarToast('Has dado "Me gusta" a la publicación'))
+          .catch(error => console.error('Error al dar "Me gusta":', error));
+      }
+    }, error => {
+      console.error('Error al verificar la existencia de la publicación:', error);
+      this.mostrarToast('Error al verificar la existencia de la publicación.');
+    });
+  }
+  
   
   ionViewWillEnter() {
     console.log('Tab2 se ha vuelto activa');
@@ -213,8 +382,7 @@ export class Tab2Page implements OnInit {
           icon: 'paw',
           handler: () => this.solicitarAdopcion(publicacion),
         },
-        // Agregar la opción de cambiar estado solo si el usuario es admin
-        ...(this.userRole === 'admin' ? [{
+        ...(this.userRole === 'admin' || this.user.uid === publicacion.idUsuarioCreador ? [{
           text: `Cambiar estado a ${isAdopted ? 'Disponible' : 'Adoptado'}`,
           icon: isAdopted ? 'checkmark-circle' : 'close-circle', // Iconos dinámicos basados en el estado
           handler: () => this.cambiarEstadoMascota(publicacion, isAdopted ? 'Disponible' : 'Adoptado'),
@@ -388,22 +556,6 @@ export class Tab2Page implements OnInit {
     await modal.present();
   }
 
-  toggleMeGusta(publicacion: { id: string; likes: string[] }) {
-    const userId = this.user.uid;
-    const likes = publicacion.likes || [];
-
-    if (likes.includes(userId)) {
-      const newLikes = likes.filter(id => id !== userId);
-      this.firestore.collection('publicaciones').doc(publicacion.id).update({ likes: newLikes })
-        .then(() => this.mostrarToast('Has quitado "Me gusta" a la publicación'))
-        .catch(error => console.error('Error al quitar "Me gusta":', error));
-    } else {
-      likes.push(userId);
-      this.firestore.collection('publicaciones').doc(publicacion.id).update({ likes })
-        .then(() => this.mostrarToast('Has dado "Me gusta" a la publicación'))
-        .catch(error => console.error('Error al dar "Me gusta":', error));
-    }
-  }
 
 
 
@@ -434,6 +586,7 @@ export class Tab2Page implements OnInit {
   
     modal.onDidDismiss().then((dataReturned) => {
       if (dataReturned.data) {
+        // Añadir la solicitud a Firestore
         this.firestore.collection('solicitudes_adopcion').add({
           idMascota: publicacion.id || 'ID desconocido',
           nombreMascota: publicacion.nombreMascota || 'Nombre desconocido',
@@ -445,16 +598,59 @@ export class Tab2Page implements OnInit {
           tieneHijos: dataReturned.data.tieneHijos,  
           direccion: dataReturned.data.direccion,
           motivoAdopcion: dataReturned.data.motivoAdopcion,
-          identificacionURL: dataReturned.data.identificacionURL,  // Asegurarse de incluir la URL del archivo
+          identificacionURL: dataReturned.data.identificacionURL,
           fecha: new Date(),
           estado: 'Pendiente',
-        }).then(() => this.mostrarToast('Solicitud de adopción enviada con éxito'))
-          .catch(error => console.error('Error al enviar solicitud de adopción:', error));
+        }).then(() => {
+          // Mostrar mensaje de éxito
+          this.mostrarToast('Solicitud de adopción enviada con éxito');
+          
+          // Enviar notificación al dueño de la publicación
+          this.enviarNotificacionAlDueno(publicacion, dataReturned.data);
+        }).catch(error => console.error('Error al enviar solicitud de adopción:', error));
       }
     });
   
-    return await modal.present();
+    return await modal.present(); 
   }
+  
+  // Función para enviar notificación al dueño de la publicación
+  enviarNotificacionAlDueno(publicacion: any, datosSolicitante: any) {
+    // Obtener los datos del dueño de la publicación
+    const idDueno = publicacion.idUsuarioCreador; // Usar el campo correcto para identificar al creador de la publicación
+    if (!idDueno) {
+      console.error('Error: No se pudo encontrar el ID del creador de la publicación.');
+      this.mostrarToast('Error al enviar notificación: Falta el ID del creador de la publicación');
+      return;
+    }
+  
+    // Crear el mensaje de la notificación
+    const mensaje = 
+    `El usuario ${datosSolicitante.nombreCompleto || 'Desconocido'} ha solicitado adoptar a ${publicacion.nombreMascota || 'sin nombre'}.\n\n` +
+    `Datos del solicitante:\n` +
+    `Nombre: ${datosSolicitante.nombreCompleto || 'No especificado'}\n` +
+    `Teléfono: ${datosSolicitante.telefono || 'No especificado'}\n` +
+    `Correo electrónico: ${this.user.email || 'No especificado'}`;
+  
+    console.log('Obteniendo correo del solicitante:', this.user.email);
+
+    // Crear la notificación a añadir
+    const nuevaNotificacion = {
+      fecha: new Date().toISOString(),
+      leida: false,
+      mensaje: mensaje
+    };
+  
+    // Añadir la notificación al documento del usuario
+    this.firestore.collection('users').doc(idDueno).update({
+      notificaciones: arrayUnion(nuevaNotificacion) // Utilizar arrayUnion importado
+    }).then(() => {
+      console.log('Notificación guardada correctamente en el perfil del dueño de la publicación');
+    }).catch(error => {
+      console.error('Error al guardar la notificación en el perfil del dueño:', error);
+    });
+  }
+  
   
 
 

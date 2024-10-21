@@ -1,9 +1,24 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title size="large">Mascotas en Adopción</ion-title>
+  <ion-toolbar class="header-toolbar">
+    <ion-title size="large" class="header-title">Mascotas en Adopción</ion-title>
+  </ion-toolbar>
 
+  <!-- Sección de Filtros -->
+  <ion-toolbar class="filter-toolbar">
+    <ion-item lines="none" class="filter-item">
+      <ion-label class="filter-label">Tipo de Mascota</ion-label>
+      <ion-select [(ngModel)]="filtroTipoMascota" (ionChange)="filtrarMascotas()" placeholder="Seleccionar tipo" interface="popover" class="filter-select">
+        <ion-select-option *ngFor="let tipo of tiposDeMascotas" [value]="tipo" class="filter-option">
+          {{ tipo }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
   </ion-toolbar>
 </ion-header>
+
+
+
+
 <ion-content [fullscreen]="true" class="custom-background">
   <ion-list *ngIf="publicaciones && publicaciones.length > 0">
     <ion-card *ngFor="let publicacion of publicaciones" class="card-transparente">
@@ -48,11 +63,6 @@
               <ng-template #telefonoParticular>
                 <p><strong>Teléfono: </strong> {{ publicacion.telefonoDonante }}</p>
               </ng-template>
-              
-              
-              
-              
-              
               <p><strong>Me gusta:</strong> {{ publicacion.likes?.length || 0 }}</p>
             </ion-card-content>
           </ion-col>
@@ -73,10 +83,6 @@
   <ion-list *ngIf="!publicaciones || publicaciones.length === 0">
     <ion-item>
       <ion-label>No hay mascotas disponibles para donación en este momento.</ion-label>
-    </ion-item>
-  </ion-list>
-  <ion-list>
-    <ion-item>
     </ion-item>
   </ion-list>
 </ion-content>

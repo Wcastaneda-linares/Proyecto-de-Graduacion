@@ -6,11 +6,15 @@ import { getAuth, EmailAuthProvider, reauthenticateWithCredential } from 'fireba
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class AuthService {
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router
   ) { }
+
+  
 
   async reautenticarUsuario(currentPassword: string): Promise<void> {
     const user = await this.afAuth.currentUser;
@@ -30,6 +34,7 @@ export class AuthService {
       throw new Error('Usuario no autenticado.');
     }
   }
+
 
   async cambiarContrasena(newPassword: string): Promise<void> {
     const user = await this.afAuth.currentUser;

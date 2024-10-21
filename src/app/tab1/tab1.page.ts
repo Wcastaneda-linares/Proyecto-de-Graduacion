@@ -3,6 +3,7 @@ import { NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../user-service/auth.service';
 import { PhotoService } from '../services/photo.service'; // Asegúrate de importar esto
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
 
 @Component({
   selector: 'app-tab1',

@@ -34,6 +34,14 @@ ion-list.md {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra más prominente */
 }
 
+.mensaje-notificacion {
+  white-space: pre-wrap; /* Respetar saltos de línea */
+  word-wrap: break-word; /* Ajustar el contenido si se desborda */
+  font-size: 14px; /* Ajusta el tamaño según tus preferencias */
+  margin-top: 8px; /* Espacio entre el mensaje y el título */
+}
+
+
 ion-item {
   --ion-background-color: transparent; /* Sin fondo */
   margin-bottom: 10px;

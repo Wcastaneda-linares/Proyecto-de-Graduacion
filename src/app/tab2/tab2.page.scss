@@ -17,6 +17,7 @@ ion-content {
 ion-list {
   background: rgba(255, 255, 255, 0.1);  /* Fondo semi-transparente */
   backdrop-filter: blur(10px); /* Aplicamos desenfoque para darle un toque elegante */
+  margin-bottom: 60px;
 }
 
 
@@ -51,7 +52,11 @@ ion-button {
 
 ion-item[lines="none"] {
   --min-height: 0;
-  margin-top: -10px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  
 }
 
 /* Sombras en hover */
@@ -88,3 +93,46 @@ ion-button {
 ion-icon {
   margin-right: 5px;
 }
+
+/* Estilos para el header */
+.header-toolbar {
+  --background: var(--ion-color-primary);
+  --ion-color-base: #ffffff; /* Color del texto */
+}
+
+.header-title {
+  font-size: 1.4em;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Estilos para la sección de filtros */
+.filter-toolbar {
+  --background: #f8f8f8; /* Fondo suave */
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.filter-item {
+  --min-height: 55px; /* Ajustar la altura mínima */
+  padding: 0 12px; /* Espaciado interno */
+  background-color: #ffffff; /* Fondo blanco */
+  border-radius: 12px; /* Bordes redondeados */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  margin: 12px 0; /* Margen superior e inferior */
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #333; /* Color del texto */
+}
+
+.filter-select {
+  width: 100%;
+  --padding-start: 12px; /* Ajuste de padding interno */
+}
+
+.filter-option {
+  padding: 8px 12px; /* Ajustar espaciado de las opciones */
+}
+

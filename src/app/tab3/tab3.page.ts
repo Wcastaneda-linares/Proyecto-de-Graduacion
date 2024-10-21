@@ -44,6 +44,18 @@ export class Tab3Page implements OnInit {
     }
     
 
+    // Función para obtener las notificaciones
+obtenerNotificaciones() {
+  if (!this.usuario?.uid) return; // Verifica que el usuario esté autenticado
+
+  this.firestore.collection('notificaciones', ref => ref.where('idUsuarioDueno', '==', this.usuario.uid))
+    .valueChanges({ idField: 'id' })
+    .subscribe((notificaciones: any[]) => {
+      this.notificaciones = notificaciones;
+      this.actualizarContador(); // Actualiza el contador de notificaciones
+    });
+}
+
     
 
     obtenerUsuarioActual() {

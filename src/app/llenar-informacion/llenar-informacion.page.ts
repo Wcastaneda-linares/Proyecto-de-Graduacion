@@ -4,7 +4,7 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ToastController } from '@ionic/angular';
 import { FireserviceService } from '../fireservice.service';
-
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 @Component({
   selector: 'app-llenar-informacion',
   templateUrl: './llenar-informacion.page.html',
@@ -29,6 +29,8 @@ export class LlenarInformacionPage {
   direccionDonante: string = '';
   centrosAdopcion: any[] = []; // Inicializa la lista de centros
   centroId: string = ''; // ID del centro de adopción seleccionado
+  publicaciones: any[] = [];
+  user: any;
 
 
   constructor(
@@ -37,7 +39,8 @@ export class LlenarInformacionPage {
     private storage: AngularFireStorage,
     private firestore: AngularFirestore,
     private toastController: ToastController,
-    private fireService: FireserviceService
+    private fireService: FireserviceService,
+    private afAuth: AngularFireAuth
   ) {
     const state = this.router.getCurrentNavigation()?.extras.state;
     if (state) {
@@ -51,6 +54,14 @@ export class LlenarInformacionPage {
 
   ngOnInit() {
     this.cargarCentrosAdopcion();
+    this.afAuth.authState.subscribe(user => {
+      if (user) {
+        this.user = user;
+        console.log('Usuario autenticado:', this.user);
+      } else {
+        console.warn('No se encontró un usuario autenticado.');
+      }
+    });
   }
 
   async cargarDocumento(event: any) {
@@ -95,7 +106,6 @@ export class LlenarInformacionPage {
     }
   }
   
-
   async crearPublicacion() {
     console.log('Tipo de Mascota:', this.tipoMascota);
     console.log('Estado Salud:', this.estadoSaludMascota);
@@ -150,8 +160,19 @@ export class LlenarInformacionPage {
       }
     }
   
+    // Verificar si hay un usuario autenticado
+    if (!this.user || !this.user.uid) {
+      console.error('No se ha encontrado un usuario autenticado.');
+      this.mostrarToast('Error al crear la publicación. Usuario no autenticado.');
+      return;
+    }
+  
+    // Crear un ID personalizado para la publicación
+    const idPublicacion = this.firestore.createId();
+  
     // Construir el objeto de publicación
     const publicacionData = {
+      idUsuarioCreador: this.user.uid, // Agregar el UID del usuario autenticado
       centroId: this.centroId || null, // Asignar el ID del centro si existe
       nombreCentro: datosCentro.nombre,
       direccionCentro: datosCentro.direccion,
@@ -175,23 +196,24 @@ export class LlenarInformacionPage {
       },
       documentoURL: this.ubicacionMascota === 'particular' ? this.documentoURL : null,
       imagenURL: this.imagenURL,
-      correo: this.usuarioLogueado.email,
+      correo: this.user.email, // Usar correo del usuario autenticado
     };
   
-    // Intentar crear la publicación en Firestore
+    // Intentar crear la publicación en Firestore con un ID personalizado
     try {
-      await this.firestore.collection('publicaciones').add(publicacionData);
+      await this.firestore.collection('publicaciones').doc(idPublicacion).set(publicacionData);
       this.mostrarToast('Publicación creada exitosamente');
       this.router.navigate(['tabs/tab2']);
-  
-      // Restablecer los campos del formulario
-      this.limpiarFormulario();
     } catch (error) {
       console.error('Error al crear la publicación: ', error);
       this.mostrarToast('Error al crear la publicación');
     }
   }
   
+  
+  
+
+
   limpiarFormulario() {
     this.tipoMascota = ''; // Si tipoMascota es de tipo string
     this.estadoSaludMascota = ''; // Si estadoSaludMascota es de tipo string
@@ -210,9 +232,7 @@ export class LlenarInformacionPage {
     this.imagenURL = ''; // Si imagenURL es de tipo string
   }
   
-  
-  
-  
+
   
   
   

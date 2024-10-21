@@ -40,10 +40,11 @@
     <ion-list *ngIf="mostrarNotificaciones">
       <ion-item *ngFor="let notificacion of notificaciones">
         <ion-label>
-          <p>{{ notificacion.mensaje }}</p>
-          <small>{{ notificacion.fecha | date: 'medium' }}</small>
+          <h2>Notificación de Adopción</h2>
+          <pre class="mensaje-notificacion">{{ notificacion.mensaje }}</pre>
+          <p class="fecha-notificacion">{{ notificacion.fecha | date: 'medium' }}</p>
         </ion-label>
-      </ion-item>
+      </ion-item>      
     </ion-list>
 
     <ion-item *ngIf="isAdmin()" button (click)="toggleCentrosAdopcion()">
