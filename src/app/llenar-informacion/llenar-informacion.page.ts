@@ -132,7 +132,7 @@ export class LlenarInformacionPage {
         console.log('Buscando información para centroId:', this.centroId);
         const centroSnapshot = await this.firestore
           .collection('centros_adopcion')
-          .doc(this.centroId) // Usar el ID del centro, no el nombre
+          .doc(this.centroId)
           .get()
           .toPromise();
   
@@ -156,6 +156,7 @@ export class LlenarInformacionPage {
       nombreCentro: datosCentro.nombre,
       direccionCentro: datosCentro.direccion,
       telefonoCentro: datosCentro.telefono,
+      tipoDonante: this.ubicacionMascota, // Almacenar el tipo de donante (centro o particular)
       mascota: {
         nombre: this.nombreMascota,
         raza: this.razaMascota,
@@ -165,6 +166,7 @@ export class LlenarInformacionPage {
         descripcion: this.descripcionMascota,
         tipo: this.tipoMascota,
         estadoSalud: this.estadoSaludMascota,
+        estado: "Disponible" // Estado de la mascota por defecto
       },
       donante: {
         nombre: this.ubicacionMascota === 'particular' ? this.nombreDonante : null,
@@ -181,11 +183,34 @@ export class LlenarInformacionPage {
       await this.firestore.collection('publicaciones').add(publicacionData);
       this.mostrarToast('Publicación creada exitosamente');
       this.router.navigate(['tabs/tab2']);
+  
+      // Restablecer los campos del formulario
+      this.limpiarFormulario();
     } catch (error) {
       console.error('Error al crear la publicación: ', error);
       this.mostrarToast('Error al crear la publicación');
     }
   }
+  
+  limpiarFormulario() {
+    this.tipoMascota = ''; // Si tipoMascota es de tipo string
+    this.estadoSaludMascota = ''; // Si estadoSaludMascota es de tipo string
+    this.ubicacionMascota = ''; // Si ubicación es de tipo string
+    this.nombreDonante = ''; // Si nombreDonante es de tipo string
+    this.numeroDonante = ''; // Si numeroDonante es de tipo string
+    this.direccionDonante = ''; // Si direccionDonante es de tipo string
+    this.documentoURL = ''; // Si documentoURL es de tipo string
+    this.centroId = ''; // Si centroId es de tipo string
+    this.nombreMascota = ''; // Si nombreMascota es de tipo string
+    this.razaMascota = ''; // Si razaMascota es de tipo string
+    this.edadMascota = 0; // Si edadMascota es de tipo número
+    this.sexoMascota = ''; // Si sexoMascota es de tipo string
+    this.personalidadMascota = []; // Si personalidadMascota es un array
+    this.descripcionMascota = ''; // Si descripcionMascota es de tipo string
+    this.imagenURL = ''; // Si imagenURL es de tipo string
+  }
+  
+  
   
   
   

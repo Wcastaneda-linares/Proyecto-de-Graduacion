@@ -138,29 +138,364 @@
       </ion-card-header>
   
       <ion-card-content>
-        <ion-item>
-          <ion-label>Total de Centros de Adopción: {{ totalCentrosAdopcion }}</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>Total de Mensajes: {{ totalMensajes }}</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>Total de Publicaciones: {{ totalPublicaciones }}</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>Total de Solicitudes de Adopción: {{ totalSolicitudesAdopcion }}</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>Total de Usuarios: {{ totalUsuarios }}</ion-label>
-        </ion-item>
+        <ion-accordion-group>
+          <ion-accordion value="centrosAdopcion" id="accordionCentrosAdopcion">
+            <ion-item slot="header" detail="false">
+              <ion-label>Total de Centros de Adopción: {{ totalCentrosAdopcion }}</ion-label>
+            </ion-item>
+            <div class="ion-padding" slot="content">
+              <!-- Aquí puedes agregar gráficos o detalles específicos -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Gráfica de Servicios y Hogares</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart 
+                    [series]="chartOptionsServicios.series"
+                    [chart]="chartOptionsServicios.chart"
+                    [xaxis]="chartOptionsServicios.xaxis"
+                    [colors]="chartOptionsServicios.colors"
+                    [title]="chartOptionsServicios.title"
+                    [plotOptions]="chartOptionsServicios.plotOptions"
+                    [dataLabels]="chartOptionsServicios.dataLabels"
+                    [legend]="chartOptionsServicios.legend">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Servicios por Hogar</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-list>
+                    <ion-item *ngFor="let centro of centrosData">
+                      <ion-label>
+                        <h2>{{ centro.nombre }}</h2>
+                        <p>Servicios: {{ centro.servicios.join(', ') }}</p>
+                      </ion-label>
+                    </ion-item>
+                  </ion-list>
+                </ion-card-content>
+              </ion-card>
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Opciones de Exportación e Impresión</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-button expand="full" (click)="exportarReporteCentrosPDF()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar PDF
+                  </ion-button>
+                  
+                  <ion-button expand="full" (click)="exportarReporteCentrosExcel()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar Excel
+                  </ion-button>
+                  
+                  <ion-button expand="full" (click)="imprimirReporteCentros()">
+                    <ion-icon slot="start" name="print-outline"></ion-icon>
+                    Imprimir
+                  </ion-button>
+                  
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </ion-accordion>
+        
+          <ion-accordion value="mensajes">
+            <ion-item slot="header" detail="false">
+              <ion-label>Total de Mensajes: {{ totalMensajes }}</ion-label>
+            </ion-item>
+            <div class="ion-padding" slot="content">
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Gráfica de Mensajes y Respuestas</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <!-- Gráfica de Mensajes y Respuestas -->
+                  <div #chartRefMensajes>
+                    <apx-chart 
+                      [series]="chartOptionsMensajes.series"
+                      [chart]="chartOptionsMensajes.chart"
+                      [xaxis]="chartOptionsMensajes.xaxis"
+                      [colors]="chartOptionsMensajes.colors"
+                      [title]="chartOptionsMensajes.title"
+                      [plotOptions]="chartOptionsMensajes.plotOptions"
+                      [dataLabels]="chartOptionsMensajes.dataLabels"
+                      [legend]="chartOptionsMensajes.legend">
+                    </apx-chart>
+                  </div>
+
+                </ion-card-content>
+              </ion-card>
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Opciones de Exportación e Impresión</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-button expand="full" (click)="exportarReporteMensajesPDF()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar PDF
+                  </ion-button>
+                  
+                  <ion-button expand="full" (click)="exportarReporteMensajesExcel()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar Excel
+                  </ion-button>
+                  
+                  <ion-button expand="full" (click)="imprimirReporteMensajes()">
+                    <ion-icon slot="start" name="print-outline"></ion-icon>
+                    Imprimir
+                  </ion-button>
+                  
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </ion-accordion>
+          
+          
+          
+          
+        
+          <ion-accordion value="publicaciones">
+            <ion-item slot="header" detail="false">
+              <ion-label>Total de Mascotas: {{ totalPublicaciones }}</ion-label>
+            </ion-item>
+            <div class="ion-padding" slot="content">
+              <!-- Gráfico de Tipos de Animales -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Tipos de Mascotas</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart id="graficoTiposAnimales" 
+                  [series]="chartOptionsTipoAnimal.series"
+                  [chart]="chartOptionsTipoAnimal.chart"
+                  [xaxis]="chartOptionsTipoAnimal.xaxis"
+                  [colors]="chartOptionsTipoAnimal.colors"
+                  [title]="chartOptionsTipoAnimal.title"
+                  [plotOptions]="chartOptionsTipoAnimal.plotOptions"
+                  [dataLabels]="chartOptionsTipoAnimal.dataLabels"
+                  [legend]="chartOptionsTipoAnimal.legend">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+          
+              <!-- Gráfico por Estado de Salud -->
+              <!-- Gráfico por Estado de Salud (Barras) -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Estado de Salud de las Mascotas</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart id="graficoEstadoSalud"
+                    [series]="chartOptionsEstadoSalud.series"
+                    [chart]="chartOptionsEstadoSalud.chart"
+                    [xaxis]="chartOptionsEstadoSalud.xaxis"
+                    [plotOptions]="chartOptionsEstadoSalud.plotOptions"
+                    [dataLabels]="chartOptionsEstadoSalud.dataLabels"
+                    [colors]="chartOptionsEstadoSalud.colors"
+                    [title]="chartOptionsEstadoSalud.title">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+
+          
+              <!-- Gráfico por Estado de Adopción -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Estado de Adopción</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart id="graficoEstadoAdopcion"
+                  [series]="chartOptionsEstadoAdopcion.series"
+                  [chart]="chartOptionsEstadoAdopcion.chart"
+                  [xaxis]="chartOptionsEstadoAdopcion.xaxis"
+                  [colors]="chartOptionsEstadoAdopcion.colors"
+                  [title]="chartOptionsEstadoAdopcion.title"
+                  [plotOptions]="chartOptionsEstadoAdopcion.plotOptions"
+                  [dataLabels]="chartOptionsEstadoAdopcion.dataLabels"
+                  [legend]="chartOptionsEstadoAdopcion.legend"
+                  [labels]="chartOptionsEstadoAdopcion.labels">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+          
+              <!-- Gráfico por Tipo de Donante -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Total de Mascotas por Tipo de Donante</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart id="graficoTipoDonante"
+                  [series]="chartOptionsTipoDonante.series"
+                  [chart]="chartOptionsTipoDonante.chart"
+                  [xaxis]="chartOptionsTipoDonante.xaxis"
+                  [colors]="chartOptionsTipoDonante.colors"
+                  [title]="chartOptionsTipoDonante.title"
+                  [plotOptions]="chartOptionsTipoDonante.plotOptions"
+                  [dataLabels]="chartOptionsTipoDonante.dataLabels"
+                  [legend]="chartOptionsTipoDonante.legend">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+          
+              <!-- Gráfico de Animales por Centro -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Total de Mascotas por Centro</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart id="graficoAnimalesPorCentro"
+                  [series]="chartOptionsAnimalesPorCentro.series"
+                  [chart]="chartOptionsAnimalesPorCentro.chart"
+                  [xaxis]="chartOptionsAnimalesPorCentro.xaxis"
+                  [colors]="chartOptionsAnimalesPorCentro.colors"
+                  [title]="chartOptionsAnimalesPorCentro.title"
+                  [plotOptions]="chartOptionsAnimalesPorCentro.plotOptions"
+                  [dataLabels]="chartOptionsAnimalesPorCentro.dataLabels"
+                  [legend]="chartOptionsAnimalesPorCentro.legend">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+          
+              <!-- Opciones de Exportación e Impresión -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Opciones de Exportación e Impresión</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-button expand="full" (click)="exportarReportePublicacionesPDF()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar PDF
+                  </ion-button>
+          
+                  <ion-button expand="full" (click)="exportarReportePublicacionesExcel()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar Excel
+                  </ion-button>
+          
+                  <ion-button expand="full" (click)="imprimirReportePublicaciones()">
+                    <ion-icon slot="start" name="print-outline"></ion-icon>
+                    Imprimir
+                  </ion-button>
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </ion-accordion>
+          
+          
+        
+          <ion-accordion value="solicitudesAdopcion">
+            <ion-item slot="header" detail="false">
+              <ion-label>Total de Solicitudes de Adopción: {{ totalSolicitudesAdopcion }}</ion-label>
+            </ion-item>
+            <div class="ion-padding" slot="content">
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Detalles de Solicitudes de Adopción</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart 
+                    id="graficoSolicitudesAdopcion"
+                    [series]="chartOptionsEstadoSolicitudes.series"
+                    [chart]="chartOptionsEstadoSolicitudes.chart"
+                    [xaxis]="chartOptionsEstadoSolicitudes.xaxis"
+                    [plotOptions]="chartOptionsEstadoSolicitudes.plotOptions"
+                    [dataLabels]="chartOptionsEstadoSolicitudes.dataLabels"
+                    [colors]="chartOptionsEstadoSolicitudes.colors"
+                    [title]="chartOptionsEstadoSolicitudes.title">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+          
+              <!-- Botones de Exportación e Impresión -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Opciones de Exportación e Impresión</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-button expand="full" (click)="exportarReporteSolicitudesPDF()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar PDF
+                  </ion-button>
+          
+                  <ion-button expand="full" (click)="exportarReporteSolicitudesExcel()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar Excel
+                  </ion-button>
+          
+                  <ion-button expand="full" (click)="imprimirReporteSolicitudes()">
+                    <ion-icon slot="start" name="print-outline"></ion-icon>
+                    Imprimir
+                  </ion-button>
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </ion-accordion>
+          
+          
+        
+          <ion-accordion value="usuarios">
+            <ion-item slot="header" detail="false">
+              <ion-label>Total de Usuarios: {{ totalUsuarios }}</ion-label>
+            </ion-item>
+            <div class="ion-padding" slot="content">
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Usuarios del Sistema por Rol</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart 
+                    id="graficoUsuariosPorRol"
+                    [series]="chartOptionsRolesUsuarios.series"
+                    [chart]="chartOptionsRolesUsuarios.chart"
+                    [xaxis]="chartOptionsRolesUsuarios.xaxis"
+                    [plotOptions]="chartOptionsRolesUsuarios.plotOptions"
+                    [dataLabels]="chartOptionsRolesUsuarios.dataLabels"
+                    [colors]="chartOptionsRolesUsuarios.colors"
+                    [title]="chartOptionsRolesUsuarios.title">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+          
+              <!-- Opciones de Exportación e Impresión -->
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title>Opciones de Exportación e Impresión</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-button expand="full" (click)="exportarReporteUsuariosPDF()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar PDF
+                  </ion-button>
+          
+                  <ion-button expand="full" (click)="exportarReporteUsuariosExcel()">
+                    <ion-icon slot="start" name="download-outline"></ion-icon>
+                    Descargar Excel
+                  </ion-button>
+          
+                  <ion-button expand="full" (click)="imprimirReporteUsuarios()">
+                    <ion-icon slot="start" name="print-outline"></ion-icon>
+                    Imprimir
+                  </ion-button>
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </ion-accordion>
+          
+          
+        </ion-accordion-group>
+        
+        
       
         <ion-card *ngIf="chartOptions && chartOptions.series.length > 0">
           <ion-card-header>
-            <ion-card-title>Gráfico de Estadísticas</ion-card-title>
+            <ion-card-title>Estadística General del Uso de la Aplicación Móvil</ion-card-title>
           </ion-card-header>
           <ion-card-content>
             <div #chartRef>
-              <apx-chart 
+              <apx-chart id="graficoEstadisticas"
               [series]="chartOptions.series"
               [chart]="chartOptions.chart"
               [labels]="chartOptions.labels"
